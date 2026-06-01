@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import time
 
 st.set_page_config(page_title="Simulasi Ujian TPA", layout="wide")
@@ -150,9 +151,8 @@ st.markdown("---")
 # LOGIKA UI: SEBELUM UJIAN DIMULAI
 # ==========================================
 if not st.session_state.ujian_dimulai:
-    st.info("⚠️ **PERHATIAN:** Tes ini memiliki batas waktu **1 Jam (60 Menit)**. Waktu akan langsung berjalan saat Anda menekan tombol di bawah ini.")
+    st.info("⚠️ **PERHATIAN:** Tes ini memiliki batas waktu **1 Jam (60 Menit)**. Jika waktu habis, sistem akan otomatis mengumpulkan jawaban Anda dan Anda tidak bisa mengisi lagi.")
     
-    # Pilihan Paket Soal
     st.session_state.pilihan_paket = st.radio(
         "Pilih Tingkat Kesulitan:",
         ["Paket 1 (Dasar)", "Paket 2 (Lanjutan TPA Asli)"]
@@ -164,77 +164,86 @@ if not st.session_state.ujian_dimulai:
         st.rerun()
 
 # ==========================================
-# LOGIKA UI: SAAT UJIAN BERJALAN & SETELAH SUBMIT
+# LOGIKA UI: SAAT UJIAN BERJALAN
 # ==========================================
 else:
-    # Tentukan soal mana yang dipakai berdasarkan pilihan
     soal_aktif = soal_paket_1 if st.session_state.pilihan_paket == "Paket 1 (Dasar)" else soal_paket_2
 
-    # --- 1. WIDGET TIMER MENGAMBANG (DI KANAN BAWAH) ---
-    waktu_selesai_ms = (st.session_state.waktu_mulai + 3600) * 1000 
-    
-    timer_html = f"""
-    <div style="position: fixed; bottom: 20px; right: 20px; background-color: #ff4b4b; color: white; padding: 12px 20px; border-radius: 8px; font-weight: bold; font-family: sans-serif; z-index: 9999; box-shadow: 0px 4px 10px rgba(0,0,0,0.3); border: 2px solid white;">
-        ⏳ Sisa Waktu: <span id="waktu_mundur">Menghitung...</span>
-    </div>
-    
-    <script>
-        var countDownDate = {waktu_selesai_ms};
-        
-        var x = setInterval(function() {{
-            var now = new Date().getTime();
-            var distance = countDownDate - now;
-            
-            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            
-            var m = minutes < 10 ? "0" + minutes : minutes;
-            var s = seconds < 10 ? "0" + seconds : seconds;
-            
-            document.getElementById("waktu_mundur").innerHTML = m + ":" + s;
-            
-            if (distance < 0) {{
-                clearInterval(x);
-                document.getElementById("waktu_mundur").innerHTML = "WAKTU HABIS!";
-                document.getElementById("waktu_mundur").parentElement.style.backgroundColor = "black";
-            }}
-        }}, 1000);
-    </script>
-    """
-    
+    # --- SCRIPT JAVASCRIPT UNTUK TIMER DAN KLIK OTOMATIS ---
     if not st.session_state.telah_submit:
-        st.markdown(timer_html, unsafe_allow_html=True)
-    
-    # --- 2. FORM KUIS TPA ---
-    st.subheader(f"Mengerjakan: {st.session_state.pilihan_paket}")
-    
-    with st.form(key='kuis_tpa'):
-        jawaban_sementara = []
-        
-        for i, item in enumerate(soal_aktif):
-            st.markdown(f"**{item['soal']}**")
+        waktu_selesai_ms = (st.session_state.waktu_mulai + 3600) * 1000 
+        js_timer = f"""
+        <script>
+            var countDownDate = {waktu_selesai_ms};
+            var parentDoc = window.parent.document;
+            var timerElement = parentDoc.getElementById('custom_timer_display');
             
-            pilihan = st.radio(
-                label=f"Opsi soal {i+1}", 
-                options=item["opsi"], 
-                index=None,
-                label_visibility="collapsed",
-                key=f"soal_{i}"
-            )
-            jawaban_sementara.append(pilihan)
-            st.write("") 
+            // Buat div melayang jika belum ada
+            if (!timerElement) {{
+                timerElement = parentDoc.createElement('div');
+                timerElement.id = 'custom_timer_display';
+                timerElement.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background-color: #ff4b4b; color: white; padding: 12px 20px; border-radius: 8px; font-weight: bold; font-family: sans-serif; z-index: 9999; box-shadow: 0px 4px 10px rgba(0,0,0,0.3); border: 2px solid white;';
+                parentDoc.body.appendChild(timerElement);
+            }}
             
-        submit_button = st.form_submit_button(label='Kumpulkan Jawaban', use_container_width=True)
+            var x = setInterval(function() {{
+                var now = new Date().getTime();
+                var distance = countDownDate - now;
+                
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                var m = minutes < 10 ? "0" + minutes : minutes;
+                var s = seconds < 10 ? "0" + seconds : seconds;
+                
+                timerElement.innerHTML = "⏳ Sisa Waktu: " + m + ":" + s;
+                
+                // JIKA WAKTU HABIS
+                if (distance < 0) {{
+                    clearInterval(x);
+                    timerElement.innerHTML = "WAKTU HABIS!";
+                    timerElement.style.backgroundColor = "black";
+                    
+                    // Cari tombol submit Streamlit dan paksa klik
+                    var buttons = parentDoc.querySelectorAll('button');
+                    for (var i = 0; i < buttons.length; i++) {{
+                        if (buttons[i].innerText.includes('Kumpulkan Jawaban')) {{
+                            buttons[i].click(); // Eksekusi Klik Otomatis
+                            break;
+                        }}
+                    }}
+                }}
+            }}, 1000);
+        </script>
+        """
+        # Render script di latar belakang
+        components.html(js_timer, height=0, width=0)
 
-    # --- 3. PROSES VALIDASI WAKTU DAN JAWABAN ---
-    if submit_button:
-        waktu_sekarang = time.time()
-        waktu_terpakai_detik = waktu_sekarang - st.session_state.waktu_mulai
+        # --- TAMPILAN FORM SOAL ---
+        st.subheader(f"Mengerjakan: {st.session_state.pilihan_paket}")
         
-        if waktu_terpakai_detik > 3605: # Toleransi delay 5 detik
-            st.error("Waktu Anda telah habis sebelum jawaban dikumpulkan! Silakan muat ulang halaman untuk mencoba lagi.")
-        else:
-            st.session_state.waktu_selesai = waktu_sekarang
+        with st.form(key='kuis_tpa'):
+            jawaban_sementara = []
+            
+            for i, item in enumerate(soal_aktif):
+                st.markdown(f"**{item['soal']}**")
+                
+                pilihan = st.radio(
+                    label=f"Opsi soal {i+1}", 
+                    options=item["opsi"], 
+                    index=None,
+                    label_visibility="collapsed",
+                    key=f"soal_{i}"
+                )
+                jawaban_sementara.append(pilihan)
+                st.write("") 
+                
+            submit_button = st.form_submit_button(label='Kumpulkan Jawaban', use_container_width=True)
+
+        # --- LOGIKA PENILAIAN ---
+        # Begitu tombol diklik (baik manual maupun otomatis dari JS)
+        if submit_button:
+            st.session_state.waktu_selesai = time.time()
             st.session_state.telah_submit = True
             st.session_state.jawaban_user = jawaban_sementara
             
@@ -255,46 +264,64 @@ else:
             
             st.rerun()
 
-    # --- 4. TAMPILKAN HASIL EVALUASI ---
-    if st.session_state.telah_submit:
-        # Kalkulasi Durasi Pengerjaan
-        durasi_detik = int(st.session_state.waktu_selesai - st.session_state.waktu_mulai)
+# ==========================================
+# LOGIKA UI: SETELAH SUBMIT (EVALUASI)
+# ==========================================
+if st.session_state.telah_submit:
+    # Hilangkan timer melayang dari layar dengan JS
+    remove_js = """
+    <script>
+        var timerElement = window.parent.document.getElementById('custom_timer_display');
+        if (timerElement) { timerElement.remove(); }
+    </script>
+    """
+    components.html(remove_js, height=0, width=0)
+
+    # Kalkulasi Durasi Pengerjaan
+    durasi_detik = int(st.session_state.waktu_selesai - st.session_state.waktu_mulai)
+    
+    # Jika sistem auto-submit mengeksekusi di detik ke-3600 (1 Jam)
+    if durasi_detik >= 3600:
+        st.error("⏰ **WAKTU HABIS!** Jawaban Anda telah dikumpulkan secara otomatis oleh sistem.")
+        durasi_menit = 60
+        sisa_detik = 0
+    else:
         durasi_menit = durasi_detik // 60
         sisa_detik = durasi_detik % 60
-        
-        st.markdown("---")
-        st.header("HASIL EVALUASI")
         st.success(f"⏱️ **Waktu Pengerjaan Anda:** {durasi_menit} Menit {sisa_detik} Detik")
+    
+    st.markdown("---")
+    st.header("HASIL EVALUASI")
+    
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Skor Total", f"{st.session_state.skor:g} / 100")
+    col2.metric("Jawaban Benar", st.session_state.benar)
+    col3.metric("Jawaban Salah/Kosong", st.session_state.salah)
+    
+    st.markdown("### Daftar Jawaban yang Salah dan Pembahasannya:")
+    
+    kesalahan_ditemukan = False
+    for i, item in enumerate(soal_aktif):
+        jawaban_benar_teks = item["opsi"][item["jawaban"]]
+        jawaban_user_sekarang = st.session_state.jawaban_user[i]
         
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Skor Total", f"{st.session_state.skor:g} / 100")
-        col2.metric("Jawaban Benar", st.session_state.benar)
-        col3.metric("Jawaban Salah/Kosong", st.session_state.salah)
-        
-        st.markdown("### Daftar Jawaban yang Salah dan Pembahasannya:")
-        
-        kesalahan_ditemukan = False
-        for i, item in enumerate(soal_aktif):
-            jawaban_benar_teks = item["opsi"][item["jawaban"]]
-            jawaban_user_sekarang = st.session_state.jawaban_user[i]
-            
-            if jawaban_user_sekarang != jawaban_benar_teks:
-                kesalahan_ditemukan = True
-                with st.expander(f"Soal {i+1} (Salah)"):
-                    st.markdown(f"**Pertanyaan:** \n{item['soal']}")
-                    st.write(f"❌ **Jawabanmu:** {jawaban_user_sekarang if jawaban_user_sekarang else 'Tidak Dijawab'}")
-                    st.write(f"✅ **Jawaban Benar:** {jawaban_benar_teks}")
-                    st.info(f"**Pembahasan:** {item['pembahasan']}")
-                    
-        if not kesalahan_ditemukan:
-            st.balloons()
-            st.success("Luar biasa! Semua jawaban benar. Kamu sudah siap mengikuti ujian TPA sebenarnya!")
-        else:
-            st.warning("Silakan pelajari pembahasan dari jawaban yang salah di atas agar tidak mengulanginya di tes sebenarnya.")
-        
-        if st.button("Kembali ke Menu Utama"):
-            st.session_state.ujian_dimulai = False
-            st.session_state.waktu_mulai = 0
-            st.session_state.waktu_selesai = 0
-            st.session_state.telah_submit = False
-            st.rerun()
+        if jawaban_user_sekarang != jawaban_benar_teks:
+            kesalahan_ditemukan = True
+            with st.expander(f"Soal {i+1} (Salah)"):
+                st.markdown(f"**Pertanyaan:** \n{item['soal']}")
+                st.write(f"❌ **Jawabanmu:** {jawaban_user_sekarang if jawaban_user_sekarang else 'Tidak Dijawab (Kosong)'}")
+                st.write(f"✅ **Jawaban Benar:** {jawaban_benar_teks}")
+                st.info(f"**Pembahasan:** {item['pembahasan']}")
+                
+    if not kesalahan_ditemukan:
+        st.balloons()
+        st.success("Luar biasa! Semua jawaban benar. Kamu sudah siap mengikuti ujian TPA sebenarnya!")
+    else:
+        st.warning("Silakan pelajari pembahasan dari jawaban yang salah di atas agar tidak mengulanginya di tes sebenarnya.")
+    
+    if st.button("Kembali ke Menu Utama"):
+        st.session_state.ujian_dimulai = False
+        st.session_state.waktu_mulai = 0
+        st.session_state.waktu_selesai = 0
+        st.session_state.telah_submit = False
+        st.rerun()
