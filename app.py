@@ -1,217 +1,153 @@
 import streamlit as st
-import pandas as pd
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import math
 
-st.set_page_config(page_title="Dashboard Finansial", layout="wide")
+st.set_page_config(page_title="Simulasi TPA & Psikotes", layout="wide")
 
-# --- CUSTOM CSS SMARTPHONE (PORTRAIT) & BLACK THEME ---
-st.markdown("""
-<style>
-[data-testid="stAppViewContainer"] { background-color: #000000 !important; }
-[data-testid="stHeader"] { background-color: transparent !important; }
-p, h1, h2, h3, label, li, .stMarkdown, .stMetricLabel { color: #F8F9FA !important; }
-@media (max-width: 768px) {
-    h1 { font-size: 1.2rem !important; }
-    h2 { font-size: 1.0rem !important; }
-    h3 { font-size: 0.9rem !important; }
-    p, label, li, .stMarkdown { font-size: 0.8rem !important; }
-    div[data-testid="stMetricValue"] { font-size: 1.0rem !important; }
-    div[data-testid="stMetricLabel"] { font-size: 0.7rem !important; }
-}
-</style>
-""", unsafe_allow_html=True)
+st.title("Latihan Ujian TPA & Psikotes Dasar")
+st.markdown("Kerjakan 50 soal di bawah ini. Pilih jawaban yang paling tepat. Nilai dan pembahasan akan muncul setelah kamu menekan tombol **Kumpulkan Jawaban** di bagian paling bawah.")
+st.markdown("---")
 
-st.title("Dashboard Simulasi Finansial")
-
-# --- INISIALISASI SESSION STATE ---
-if 'modal_awal' not in st.session_state: st.session_state.modal_awal = 800000000
-if 'tambahan_tahunan' not in st.session_state: st.session_state.tambahan_tahunan = 0
-if 'dividen_tahun' not in st.session_state: st.session_state.dividen_tahun = 7.0
-if 'lama_investasi' not in st.session_state: st.session_state.lama_investasi = 20
-if 'capex' not in st.session_state: st.session_state.capex = 200000000
-if 'tahun_mulai_suntikan' not in st.session_state: st.session_state.tahun_mulai_suntikan = 2
-
-tab1, tab2, tab3 = st.tabs(["Pinjaman", "Investasi", "Analisis Leverage"])
-
-# ==========================================
-# TAB 1: KALKULATOR PINJAMAN & CAPEX
-# ==========================================
-with tab1:
-    st.header("Kalkulator Pinjaman & Alokasi Capex")
-    col1, col2 = st.columns([1, 2.5])
+# Database 50 Soal TPA
+# Struktur: "soal", "opsi", "jawaban" (index dari opsi), "pembahasan"
+soal_tpa = [
+    # --- MATEMATIKA DASAR & KUKABATAKU (1-10) ---
+    {"soal": "1. 8 x 7 = ...", "opsi": ["54", "56", "64", "48"], "jawaban": 1, "pembahasan": "Hafalan dasar perkalian 8 x 7 = 56."},
+    {"soal": "2. 63 : 9 = ...", "opsi": ["6", "7", "8", "9"], "jawaban": 1, "pembahasan": "Kebalikan dari 7 x 9 = 63."},
+    {"soal": "3. 9 x 6 = ...", "opsi": ["54", "56", "45", "64"], "jawaban": 0, "pembahasan": "Hafalan dasar perkalian 9 x 6 = 54."},
+    {"soal": "4. 72 : 8 = ...", "opsi": ["7", "8", "9", "10"], "jawaban": 2, "pembahasan": "Kebalikan dari 9 x 8 = 72."},
+    {"soal": "5. 5 + 4 x 3 = ...", "opsi": ["27", "17", "12", "32"], "jawaban": 1, "pembahasan": "Kali dikerjakan lebih dulu: 4x3 = 12. Lalu 5 + 12 = 17."},
+    {"soal": "6. (5 + 4) x 3 = ...", "opsi": ["27", "17", "12", "32"], "jawaban": 0, "pembahasan": "Dalam kurung dikerjakan lebih dulu: 9 x 3 = 27."},
+    {"soal": "7. 20 - 10 : 2 = ...", "opsi": ["5", "10", "15", "25"], "jawaban": 2, "pembahasan": "Bagi dikerjakan lebih dulu: 10:2 = 5. Lalu 20 - 5 = 15."},
+    {"soal": "8. 30 : 5 + 2 x 4 = ...", "opsi": ["32", "14", "10", "16"], "jawaban": 1, "pembahasan": "Bagi dan kali dikerjakan dulu: (30:5) + (2x4) = 6 + 8 = 14."},
+    {"soal": "9. 15 + 15 : 3 - 2 = ...", "opsi": ["18", "8", "20", "12"], "jawaban": 0, "pembahasan": "Bagi dikerjakan dulu: 15 + 5 - 2 = 18."},
+    {"soal": "10. 100 - (20 + 30) x 2 = ...", "opsi": ["100", "0", "40", "50"], "jawaban": 1, "pembahasan": "Kurung dulu: 50. Lalu kali: 50 x 2 = 100. Lalu 100 - 100 = 0."},
     
-    with col1:
-        st.subheader("Parameter")
-        plafon = st.number_input("Plafon Pinjaman (Rp)", min_value=0, value=1000000000, step=50000000, format="%d")
-        st.caption(f"Format Angka Plafon: Rp {plafon:,.0f}")
-        
-        capex = st.number_input("Alokasi Capex (Laptop, Server, Langganan)", min_value=0, value=st.session_state.capex, step=10000000, format="%d")
-        st.caption(f"Format Angka Capex: Rp {capex:,.0f}")
-        
-        st.session_state.capex = capex
-        st.session_state.modal_awal = max(0, plafon - capex)
-        
-        st.caption(f"Sisa Modal Kerja Investasi: Rp {st.session_state.modal_awal:,.0f}")
-        
-        # MAKSIMAL TENOR DIUBAH MENJADI 240 BULAN (20 TAHUN)
-        tenor_bulan = st.slider("Tenor (Bulan)", min_value=12, max_value=240, value=240, step=12)
-        tipe_bunga = st.radio("Tipe Bunga", ["Fixed", "Floating"], horizontal=True)
-        
-        if tipe_bunga == "Fixed":
-            bunga_tetap = st.number_input("Bunga Efektif (% p.a)", value=8.10, step=0.01)
-        else:
-            bunga_promo = st.number_input("Bunga Promo (% p.a)", value=6.00, step=0.01)
-            masa_promo_thn = st.number_input("Lama Promo (Tahun)", value=3, step=1)
-            bunga_floating = st.number_input("Bunga Floating (% p.a)", value=12.50, step=0.01)
-            masa_promo_bln = masa_promo_thn * 12
+    # --- PECAHAN, DESIMAL, PERSENTASE (11-15) ---
+    {"soal": "11. Bentuk desimal dari 1/4 adalah...", "opsi": ["0.14", "0.25", "0.40", "0.50"], "jawaban": 1, "pembahasan": "1/4 sama dengan 25/100 atau 0.25."},
+    {"soal": "12. 50% dari Rp 120.000 adalah...", "opsi": ["Rp 50.000", "Rp 60.000", "Rp 70.000", "Rp 100.000"], "jawaban": 1, "pembahasan": "50% sama dengan setengahnya. 120.000 / 2 = 60.000."},
+    {"soal": "13. Pecahan paling sederhana dari 15/20 adalah...", "opsi": ["1/2", "2/3", "3/4", "4/5"], "jawaban": 2, "pembahasan": "Atas dan bawah sama-sama dibagi 5. Menjadi 3/4."},
+    {"soal": "14. 0.5 + 1/2 = ...", "opsi": ["0.5", "1", "1.5", "2"], "jawaban": 1, "pembahasan": "1/2 adalah 0.5. Maka 0.5 + 0.5 = 1."},
+    {"soal": "15. Diskon 20% untuk barang seharga Rp 50.000. Berapa potongannya?", "opsi": ["Rp 5.000", "Rp 10.000", "Rp 15.000", "Rp 20.000"], "jawaban": 1, "pembahasan": "(20/100) x 50.000 = 10.000."},
 
-    with col2:
-        saldo = plafon
-        data_jadwal = []
-        
-        if tipe_bunga == "Floating":
-            b_promo = (bunga_promo / 100) / 12
-            cicilan_promo = (plafon * (b_promo * (1 + b_promo)**tenor_bulan) / ((1 + b_promo)**tenor_bulan - 1)) if b_promo > 0 else plafon/tenor_bulan
-            
-            saldo_temp = plafon
-            for b in range(1, masa_promo_bln + 1):
-                porsi_bunga_t = saldo_temp * b_promo
-                saldo_temp -= (cicilan_promo - porsi_bunga_t)
-            
-            b_float = (bunga_floating / 100) / 12
-            sisa_tenor_float = tenor_bulan - masa_promo_bln
-            cicilan_floating = (saldo_temp * (b_float * (1 + b_float)**sisa_tenor_float) / ((1 + b_float)**sisa_tenor_float - 1)) if b_float > 0 else saldo_temp/sisa_tenor_float
-        else:
-            b_tetap = bunga_tetap / 100 / 12
-            cicilan_tetap = (plafon * (b_tetap * (1 + b_tetap)**tenor_bulan) / ((1 + b_tetap)**tenor_bulan - 1)) if b_tetap > 0 else plafon/tenor_bulan
+    # --- DERET ANGKA (16-20) ---
+    {"soal": "16. 2, 4, 6, 8, ...", "opsi": ["9", "10", "11", "12"], "jawaban": 1, "pembahasan": "Pola ditambah 2."},
+    {"soal": "17. 3, 9, 27, 81, ...", "opsi": ["162", "243", "324", "100"], "jawaban": 1, "pembahasan": "Pola dikali 3. 81 x 3 = 243."},
+    {"soal": "18. 100, 95, 85, 70, 50, ...", "opsi": ["25", "30", "35", "40"], "jawaban": 0, "pembahasan": "Pola pengurangan bertingkat: -5, -10, -15, -20. Selanjutnya -25. 50 - 25 = 25."},
+    {"soal": "19. 1, 1, 2, 3, 5, 8, ...", "opsi": ["10", "11", "12", "13"], "jawaban": 3, "pembahasan": "Deret Fibonacci (menjumlahkan 2 angka sebelumnya). 5 + 8 = 13."},
+    {"soal": "20. 2, 3, 6, 15, 42, ...", "opsi": ["84", "100", "123", "144"], "jawaban": 2, "pembahasan": "Selisihnya adalah 1, 3, 9, 27 (dikali 3). Selisih berikutnya 81. 42 + 81 = 123."},
 
-        for bulan in range(1, tenor_bulan + 1):
-            if tipe_bunga == "Floating":
-                bunga_bln = (bunga_promo if bulan <= masa_promo_bln else bunga_floating) / 100 / 12
-                cicilan = cicilan_promo if bulan <= masa_promo_bln else cicilan_floating
-            else:
-                bunga_bln = bunga_tetap / 100 / 12
-                cicilan = cicilan_tetap
-                
-            porsi_bunga = saldo * bunga_bln
-            porsi_pokok = cicilan - porsi_bunga
-            saldo = max(0, saldo - porsi_pokok)
-            data_jadwal.append([bulan, cicilan, porsi_pokok, porsi_bunga, saldo])
+    # --- SOAL CERITA LOGIKA WARUNG & PERBANDINGAN (21-30) ---
+    {"soal": "21. Kamu menjual gula Rp12.000/kg. Jika pembeli membeli 3 kg dan membayar dengan uang Rp50.000, kembaliannya adalah...", "opsi": ["Rp 14.000", "Rp 16.000", "Rp 24.000", "Rp 36.000"], "jawaban": 0, "pembahasan": "Total belanja = 3 x 12.000 = 36.000. Kembalian = 50.000 - 36.000 = 14.000."},
+    {"soal": "22. Beli kopi 5 saset harganya Rp 10.000. Kalau beli 8 saset harganya berapa?", "opsi": ["Rp 12.000", "Rp 15.000", "Rp 16.000", "Rp 18.000"], "jawaban": 2, "pembahasan": "Harga 1 saset = 10.000 : 5 = 2.000. Harga 8 saset = 8 x 2.000 = 16.000."},
+    {"soal": "23. Pekerjaan selesai dalam 12 hari oleh 5 tukang. Jika dikerjakan 10 tukang, selesai dalam berapa hari?", "opsi": ["6 hari", "10 hari", "24 hari", "30 hari"], "jawaban": 0, "pembahasan": "Perbandingan berbalik nilai. Pekerja 2x lebih banyak, waktu 2x lebih cepat. 12 : 2 = 6 hari."},
+    {"soal": "24. Jarak stasiun A ke B 120 km. Kereta melaju 60 km/jam. Butuh waktu berapa jam?", "opsi": ["1 jam", "2 jam", "3 jam", "4 jam"], "jawaban": 1, "pembahasan": "Waktu = Jarak / Kecepatan. 120 / 60 = 2 jam."},
+    {"soal": "25. Andi berangkat pukul 07.00 dan menempuh perjalanan 2 jam. Pukul berapa ia tiba?", "opsi": ["08.00", "09.00", "10.00", "11.00"], "jawaban": 1, "pembahasan": "07.00 + 2 jam = 09.00."},
+    {"soal": "26. Jika 3 liter bensin bisa menempuh 30 km. Berapa liter yang dibutuhkan untuk 50 km?", "opsi": ["4 liter", "5 liter", "6 liter", "7 liter"], "jawaban": 1, "pembahasan": "1 liter = 10 km. 50 km membutuhkan 50 / 10 = 5 liter."},
+    {"soal": "27. Modal Rp 100.000, untung 20%. Berapa total uang sekarang?", "opsi": ["Rp 110.000", "Rp 120.000", "Rp 130.000", "Rp 150.000"], "jawaban": 1, "pembahasan": "Untung = 20.000. Total = 100.000 + 20.000 = 120.000."},
+    {"soal": "28. Baju seharga Rp 200.000 didiskon 50% + 20%. Harga akhirnya adalah...", "opsi": ["Rp 60.000", "Rp 70.000", "Rp 80.000", "Rp 90.000"], "jawaban": 2, "pembahasan": "Diskon 50% -> sisa 100.000. Diskon lagi 20% dari 100.000 -> dipotong 20.000. Akhir = 80.000."},
+    {"soal": "29. Andi mengecat rumah 3 hari, Budi mengecat 6 hari. Kalau dikerjakan bersama, selesai dalam...", "opsi": ["2 hari", "4.5 hari", "6 hari", "9 hari"], "jawaban": 0, "pembahasan": "(1/3) + (1/6) = 2/6 + 1/6 = 3/6. Dibalik menjadi 6/3 = 2 hari."},
+    {"soal": "30. Pak RT punya Rp100.000. 1/4 bagian untuk beli paku, 1/2 bagian untuk cat. Sisa uang Pak RT?", "opsi": ["Rp 15.000", "Rp 25.000", "Rp 50.000", "Rp 75.000"], "jawaban": 1, "pembahasan": "Paku = 25.000. Cat = 50.000. Sisa = 100.000 - 75.000 = 25.000."},
+
+    # --- SILOGISME (31-35) ---
+    {"soal": "31. Semua pegawai memakai seragam. Andi adalah pegawai. Maka...", "opsi": ["Andi mungkin memakai seragam", "Andi memakai seragam", "Andi bukan pegawai", "Sebagian pegawai memakai seragam"], "jawaban": 1, "pembahasan": "Andi masuk ke dalam kelompok pegawai yang aturannya mutlak (semua)."},
+    {"soal": "32. Jika hujan, maka jalan basah. Hari ini jalan tidak basah. Maka...", "opsi": ["Hari ini hujan", "Hari ini mungkin hujan", "Hari ini tidak hujan", "Jalan kering karena panas"], "jawaban": 2, "pembahasan": "Modus Tollens: Jika akibat tidak terjadi, maka sebabnya tidak ada."},
+    {"soal": "33. Semua dokter pintar. Sebagian dokter suka membaca. Maka...", "opsi": ["Semua yang pintar suka membaca", "Sebagian dokter pintar", "Sebagian dokter pintar dan suka membaca", "Semua dokter pintar suka membaca"], "jawaban": 2, "pembahasan": "Jika 'Semua' bertemu 'Sebagian', kesimpulan pasti 'Sebagian'."},
+    {"soal": "34. Jika Budi lulus, dibelikan sepeda. Jika dibelikan sepeda, ia keliling kota. Budi tidak keliling kota. Maka...", "opsi": ["Budi lulus", "Budi tidak dibelikan sepeda karena tidak lulus", "Budi tidak lulus", "Budi malas keliling kota"], "jawaban": 2, "pembahasan": "Silogisme berantai mundur. Karena tidak keliling kota, berarti syarat pertamanya (lulus) tidak terpenuhi."},
+    {"soal": "35. Tidak ada pelaut yang penakut. Beberapa nelayan adalah penakut. Maka...", "opsi": ["Beberapa nelayan bukan pelaut", "Semua nelayan adalah pelaut", "Beberapa pelaut adalah nelayan", "Tidak ada nelayan yang berani"], "jawaban": 0, "pembahasan": "Nelayan yang penakut otomatis tidak bisa dikategorikan sebagai pelaut."},
+
+    # --- ANALOGI KATA (36-40) ---
+    {"soal": "36. Lapar : Makan = Haus : ...", "opsi": ["Air", "Minum", "Gelas", "Es"], "jawaban": 1, "pembahasan": "Jika lapar butuh makan, jika haus butuh minum."},
+    {"soal": "37. Kayu : Lemari = Kain : ...", "opsi": ["Kapas", "Baju", "Jahit", "Benang"], "jawaban": 1, "pembahasan": "Kayu adalah bahan baku lemari. Kain adalah bahan baku baju."},
+    {"soal": "38. Masinis : Kereta Api = Nahkoda : ...", "opsi": ["Pesawat", "Mobil", "Kapal Laut", "Bus"], "jawaban": 2, "pembahasan": "Masinis menyetir kereta. Nahkoda menyetir kapal laut."},
+    {"soal": "39. Gandum : Roti : Makan = Benang : Pakaian : ...", "opsi": ["Jahit", "Pola", "Pakai", "Toko"], "jawaban": 2, "pembahasan": "Roti dibuat untuk dimakan. Pakaian dibuat untuk dipakai."},
+    {"soal": "40. Gempa Bumi : Tsunami = Hujan Deras : ...", "opsi": ["Banjir Bandang", "Mendung", "Payung", "Basah"], "jawaban": 0, "pembahasan": "Bencana alam ekstrem memicu bencana susulan ekstrem lainnya."},
+
+    # --- LOGIKA VISUAL & POSISI (DESKRIPTIF) (41-50) ---
+    {"soal": "41. Gambar 1: Kotak. Gambar 2: 2 Kotak. Gambar 3: 3 Kotak. Gambar 4 adalah...", "opsi": ["1 Kotak", "4 Kotak", "5 Kotak", "Lingkaran"], "jawaban": 1, "pembahasan": "Pola penambahan 1 kotak secara berurutan."},
+    {"soal": "42. Panah Atas, Panah Kanan, Panah Bawah. Selanjutnya panah ke arah...", "opsi": ["Atas", "Kanan", "Bawah", "Kiri"], "jawaban": 3, "pembahasan": "Panah berputar 90 derajat searah jarum jam."},
+    {"soal": "43. Segitiga (3 sisi), Segi Empat (4 sisi), Segi Lima (5 sisi). Selanjutnya...", "opsi": ["Lingkaran", "Segi Enam", "Segi Tujuh", "Segi Delapan"], "jawaban": 1, "pembahasan": "Penambahan 1 sisi pada bangun datar."},
+    {"soal": "44. Huruf 'b' dicerminkan ke kaca akan menjadi huruf...", "opsi": ["p", "q", "d", "c"], "jawaban": 2, "pembahasan": "Bayangan cermin dari 'b' memantul menjadi 'd'."},
+    {"soal": "45. Ada 2 titik, lalu 4 titik, lalu 6 titik. Gambar selanjutnya memiliki berapa titik?", "opsi": ["7 titik", "8 titik", "9 titik", "10 titik"], "jawaban": 1, "pembahasan": "Pola ditambah 2 titik secara berurutan."},
+    
+    {"soal": "46. Posisi: A duduk di sebelah kanan B. C duduk di sebelah kiri B. Siapa di tengah?", "opsi": ["A", "B", "C", "Tidak ada"], "jawaban": 1, "pembahasan": "Urutannya: C - B - A. B berada di tengah."},
+    {"soal": "47. Andi tidak jaga Malam. Cici selalu Pagi. Doni jaga setelah Andi. Jika Budi jaga Malam, Andi jaga kapan?", "opsi": ["Pagi", "Siang", "Sore", "Malam"], "jawaban": 1, "pembahasan": "Pagi: Cici. Malam: Budi. Sisa Siang & Sore. Doni harus setelah Andi, jadi Andi (Siang), Doni (Sore)."},
+    {"soal": "48. Dalam balapan, Budi menyalip pelari posisi kedua. Posisi Budi sekarang adalah...", "opsi": ["Pertama", "Kedua", "Ketiga", "Keempat"], "jawaban": 1, "pembahasan": "Jika kamu menyalip orang posisi kedua, kamu mengambil alih posisinya, yaitu posisi kedua."},
+    {"soal": "49. Rumah Tono lebih jauh dari rumah Tini. Rumah Tino lebih dekat dari rumah Tini. Rumah siapa yang paling jauh?", "opsi": ["Tono", "Tini", "Tino", "Semua sama"], "jawaban": 0, "pembahasan": "Urutan dari terjauh: Tono - Tini - Tino."},
+    {"soal": "50. Kereta A berangkat jam 08.00 tiba jam 10.00. Kereta B berangkat jam 08.00 tiba jam 09.30. Mana yang lebih cepat?", "opsi": ["Kereta A", "Kereta B", "Sama saja", "Tidak bisa dihitung"], "jawaban": 1, "pembahasan": "Kereta B hanya butuh 1,5 jam, sedangkan Kereta A butuh 2 jam."}
+]
+
+# Inisialisasi state untuk mengecek apakah form sudah di-submit
+if 'telah_submit' not in st.session_state:
+    st.session_state.telah_submit = False
+    st.session_state.skor = 0
+    st.session_state.jawaban_user = []
+
+# Membuat Form Kuis
+with st.form(key='kuis_tpa'):
+    jawaban_sementara = []
+    
+    for i, item in enumerate(soal_tpa):
+        st.write(item["soal"])
         
-        df_jadwal = pd.DataFrame(data_jadwal, columns=["Bulan", "Total Angsuran", "Porsi Pokok", "Porsi Bunga", "Sisa Pinjaman"])
-        
-        st.subheader("Ringkasan Kewajiban")
-        m1, m2 = st.columns(2)
-        m3, m4 = st.columns(2)
-        m1.metric("1. Bayar/Bulan", f"Rp {df_jadwal.iloc[0]['Total Angsuran']:,.0f}")
-        m2.metric("2. Total Bayar", f"Rp {df_jadwal['Total Angsuran'].sum():,.0f}")
-        m3.metric("3. Pokok Hutang", f"Rp {plafon:,.0f}")
-        m4.metric("4. Total Bunga", f"Rp {df_jadwal['Porsi Bunga'].sum():,.0f}")
-        
-        fig_pinjaman = make_subplots(specs=[[{"secondary_y": True}]])
-        fig_pinjaman.add_trace(go.Bar(x=df_jadwal["Bulan"], y=df_jadwal["Porsi Pokok"], name="Porsi Pokok", marker_color='#00CC96', marker_line_width=0), secondary_y=False)
-        fig_pinjaman.add_trace(go.Bar(x=df_jadwal["Bulan"], y=df_jadwal["Porsi Bunga"], name="Porsi Bunga", marker_color='#EF553B', marker_line_width=0), secondary_y=False)
-        fig_pinjaman.add_trace(go.Scatter(x=df_jadwal["Bulan"], y=df_jadwal["Sisa Pinjaman"], name="Sisa Hutang", mode='lines', line=dict(color='#636EFA', width=3)), secondary_y=True)
-        
-        fig_pinjaman.update_layout(
-            barmode='stack', bargap=0, template="plotly_dark", height=380, 
-            hovermode="x unified", margin=dict(l=0, r=0, t=10, b=0),
-            legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="right", x=1)
+        # Radio button untuk opsi jawaban. index=None agar tidak terisi otomatis (kosong di awal).
+        pilihan = st.radio(
+            label=f"Opsi soal {i+1}", 
+            options=item["opsi"], 
+            index=None,
+            label_visibility="collapsed",
+            key=f"soal_{i}"
         )
-        st.plotly_chart(fig_pinjaman, use_container_width=True)
+        jawaban_sementara.append(pilihan)
+        st.write("") # Spasi antar soal
+        
+    submit_button = st.form_submit_button(label='Kumpulkan Jawaban')
 
-        with st.expander("Tabel Detail Pembayaran (Per Bulan)"):
-            st.dataframe(df_jadwal.style.format("Rp {:,.0f}"), use_container_width=True, height=250)
-
-# ==========================================
-# TAB 2: SIMULASI INVESTASI
-# ==========================================
-with tab2:
-    st.header("Simulasi Investasi Bertahap")
-    col3, col4 = st.columns([1, 2.5])
+# Proses saat tombol Submit ditekan
+if submit_button:
+    st.session_state.telah_submit = True
+    st.session_state.jawaban_user = jawaban_sementara
     
-    with col3:
-        st.session_state.modal_awal = st.number_input("Modal Awal Investasi (Rp)", value=st.session_state.modal_awal, step=10000000)
-        st.session_state.tambahan_tahunan = st.number_input("Suntikan Tahunan (Rp)", value=st.session_state.tambahan_tahunan, step=5000000)
-        st.session_state.tahun_mulai_suntikan = st.number_input("Mulai Suntikan di Tahun Ke-", min_value=1, max_value=20, value=st.session_state.tahun_mulai_suntikan, step=1)
-        st.session_state.dividen_tahun = st.number_input("Pertumbuhan (%)", value=st.session_state.dividen_tahun, step=0.1)
-        st.session_state.lama_investasi = st.slider("Lama Investasi (Tahun)", 1, 20, st.session_state.lama_investasi)
-        
-    with col4:
-        data_inv = []
-        saldo_running = st.session_state.modal_awal
-        total_modal_disetor = st.session_state.modal_awal
-        
-        for t in range(1, st.session_state.lama_investasi + 1):
-            if t >= st.session_state.tahun_mulai_suntikan: 
-                saldo_running += st.session_state.tambahan_tahunan
-                total_modal_disetor += st.session_state.tambahan_tahunan
-            saldo_running *= (1 + st.session_state.dividen_tahun/100)
-            data_inv.append([t, total_modal_disetor, saldo_running - total_modal_disetor, saldo_running])
+    benar = 0
+    salah = 0
+    
+    for i, item in enumerate(soal_tpa):
+        jawaban_benar_teks = item["opsi"][item["jawaban"]]
+        if jawaban_sementara[i] == jawaban_benar_teks:
+            benar += 1
+        else:
+            salah += 1
             
-        df_invest = pd.DataFrame(data_inv, columns=["Tahun", "Modal Disetor", "Akumulasi Profit", "Total Portofolio"])
-        st.metric("Total Portofolio Akhir", f"Rp {saldo_running:,.0f}")
-        
-        fig_invest = go.Figure()
-        fig_invest.add_trace(go.Scatter(x=df_invest["Tahun"], y=df_invest["Modal Disetor"], mode='lines', stackgroup='one', name="Modal Disetor", fillcolor='#19D3F3', line=dict(width=0))) 
-        fig_invest.add_trace(go.Scatter(x=df_invest["Tahun"], y=df_invest["Akumulasi Profit"], mode='lines', stackgroup='one', name="Profit", fillcolor='#AB63FA', line=dict(width=0))) 
-        fig_invest.update_layout(template="plotly_dark", height=320, hovermode="x unified", margin=dict(l=0, r=0, t=10, b=0))
-        st.plotly_chart(fig_invest, use_container_width=True)
+    # Menghitung skor skala 100
+    skor_akhir = (benar / len(soal_tpa)) * 100
+    st.session_state.skor = skor_akhir
+    st.session_state.benar = benar
+    st.session_state.salah = salah
 
-# ==========================================
-# TAB 3: ANALISIS LEVERAGE (DENGAN CAPEX LOGIC)
-# ==========================================
-with tab3:
-    st.header("Profil Risiko & Kekuatan Margin")
+# Menampilkan Hasil dan Evaluasi
+if st.session_state.telah_submit:
+    st.markdown("---")
+    st.header("HASIL EVALUASI")
     
-    max_tahun = max(math.ceil(tenor_bulan / 12), st.session_state.lama_investasi)
-    data_cross = []
-    saldo_akhir = st.session_state.modal_awal
-    modal_total_disetor = st.session_state.modal_awal
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Skor Total", f"{st.session_state.skor:g} / 100")
+    col2.metric("Jawaban Benar", st.session_state.benar)
+    col3.metric("Jawaban Salah/Kosong", st.session_state.salah)
     
-    for thn in range(1, max_tahun + 1):
-        if thn <= st.session_state.lama_investasi:
-            if thn >= st.session_state.tahun_mulai_suntikan:
-                saldo_akhir += st.session_state.tambahan_tahunan
-                modal_total_disetor += st.session_state.tambahan_tahunan
-        saldo_akhir *= (1 + st.session_state.dividen_tahun/100)
+    st.markdown("### Daftar Jawaban yang Salah dan Pembahasannya:")
+    
+    kesalahan_ditemukan = False
+    for i, item in enumerate(soal_tpa):
+        jawaban_benar_teks = item["opsi"][item["jawaban"]]
+        jawaban_user_sekarang = st.session_state.jawaban_user[i]
         
-        bulan_akhir = min(thn * 12, tenor_bulan)
-        uang_cicilan = df_jadwal.iloc[:bulan_akhir]["Total Angsuran"].sum()
-        sisa_hutang = df_jadwal.iloc[bulan_akhir - 1]["Sisa Pinjaman"] if bulan_akhir < tenor_bulan else 0
-        
-        total_uang_terbakar = uang_cicilan + (modal_total_disetor - st.session_state.modal_awal)
-        margin_murni = saldo_akhir - modal_total_disetor
-        net_asset = saldo_akhir - sisa_hutang
-        
-        data_cross.append([thn, saldo_akhir, total_uang_terbakar, margin_murni, sisa_hutang, net_asset])
-
-    df = pd.DataFrame(data_cross, columns=["Tahun", "Total Aset", "Total Uang Terbakar", "Margin Murni", "Sisa Hutang", "Net Asset"])
-    
-    # Kalkulasi Titik Kritis
-    be_lunas = df[df['Margin Murni'] > df['Sisa Hutang']]
-    teks_lunas = f"✅ :green[**Tahun ke-{int(be_lunas.iloc[0]['Tahun'])}**] - Profit sanggup tutup sisa hutang bank." if not be_lunas.empty else "❌ :red[**Belum Tercapai**]"
-    
-    be_bakar = df[df['Margin Murni'] > df['Total Uang Terbakar']]
-    teks_bakar = f"✅ :green[**Tahun ke-{int(be_bakar.iloc[0]['Tahun'])}**] - Profit kalahkan semua cicilan & suntikan dana." if not be_bakar.empty else "❌ :red[**Belum Tercapai**]"
-
-    st.markdown(f"""
-    **1. Kapan margin lunasin sisa hutang?** {teks_lunas}  
-    **2. Kapan margin kalahkan uang dibakar?** {teks_bakar}
-    """)
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["Tahun"], y=df["Total Aset"], name="Total Aset", line=dict(color='#00CC96', width=3)))
-    fig.add_trace(go.Scatter(x=df["Tahun"], y=df["Net Asset"], name="Net Asset (Bebas Hutang)", line=dict(color='#FFFFFF', width=3)))
-    fig.add_trace(go.Scatter(x=df["Tahun"], y=df["Total Uang Terbakar"], name="Total Uang Terbakar", line=dict(color='#FFA15A', width=2, dash='dash')))
-    fig.add_trace(go.Scatter(x=df["Tahun"], y=df["Margin Murni"], name="Margin Keuntungan", line=dict(color='#636EFA', width=3)))
-    fig.add_trace(go.Scatter(x=df["Tahun"], y=df["Sisa Hutang"], name="Sisa Hutang", line=dict(color='#EF553B', width=3)))
-    
-    fig.update_layout(
-        template="plotly_dark", height=420, hovermode="x unified", 
-        margin=dict(l=0, r=0, t=10, b=0),
-        legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="right", x=1)
-    )
-    st.plotly_chart(fig, use_container_width=True)
+        if jawaban_user_sekarang != jawaban_benar_teks:
+            kesalahan_ditemukan = True
+            with st.expander(f"Soal {i+1} (Salah)"):
+                st.write(f"**Pertanyaan:** {item['soal']}")
+                st.write(f"❌ **Jawabanmu:** {jawaban_user_sekarang if jawaban_user_sekarang else 'Tidak Dijawab'}")
+                st.write(f"✅ **Jawaban Benar:** {jawaban_benar_teks}")
+                st.info(f"**Pembahasan:** {item['pembahasan']}")
+                
+    if not kesalahan_ditemukan:
+        st.success("Luar biasa! Semua jawaban benar. Kamu sudah siap mengikuti ujian TPA sebenarnya!")
+    else:
+        st.warning("Silakan pelajari pembahasan dari jawaban yang salah di atas agar tidak mengulanginya di tes sebenarnya.")
