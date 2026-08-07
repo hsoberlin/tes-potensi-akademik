@@ -2,66 +2,12 @@ import streamlit as st
 import streamlit.components.v1 as components
 import time
 
-st.set_page_config(page_title="Pusat Simulasi Ujian TPA & SKD", layout="wide")
+st.set_page_config(page_title="Pusat Simulasi Ujian CPNS", layout="wide")
 
 # ==============================================================================
-# 1. DATABASE SOAL LENGKAP (PAKET 1, PAKET 2, & REVISI LENGKAP PAKET 3 CPNS HOTS)
+# 1. DATABASE SOAL PAKET 1 (TIU Lanjutan - 50 Soal)
 # ==============================================================================
-
 soal_paket_1 = [
-    {"soal": "8 x 7 = ...", "opsi": ["54", "56", "64", "48"], "jawaban": 1, "pembahasan": "Hafalan dasar perkalian 8 x 7 = 56."},
-    {"soal": "63 : 9 = ...", "opsi": ["6", "7", "8", "9"], "jawaban": 1, "pembahasan": "Kebalikan dari 7 x 9 = 63."},
-    {"soal": "9 x 6 = ...", "opsi": ["54", "56", "45", "64"], "jawaban": 0, "pembahasan": "Hafalan dasar perkalian 9 x 6 = 54."},
-    {"soal": "72 : 8 = ...", "opsi": ["7", "8", "9", "10"], "jawaban": 2, "pembahasan": "Kebalikan dari 9 x 8 = 72."},
-    {"soal": "5 + 4 x 3 = ...", "opsi": ["27", "17", "12", "32"], "jawaban": 1, "pembahasan": "Kali dikerjakan lebih dulu: 4x3 = 12. Lalu 5 + 12 = 17."},
-    {"soal": "(5 + 4) x 3 = ...", "opsi": ["27", "17", "12", "32"], "jawaban": 0, "pembahasan": "Dalam kurung dikerjakan lebih dulu: 9 x 3 = 27."},
-    {"soal": "20 - 10 : 2 = ...", "opsi": ["5", "10", "15", "25"], "jawaban": 2, "pembahasan": "Bagi dikerjakan lebih dulu: 10:2 = 5. Lalu 20 - 5 = 15."},
-    {"soal": "30 : 5 + 2 x 4 = ...", "opsi": ["32", "14", "10", "16"], "jawaban": 1, "pembahasan": "Bagi dan kali dikerjakan dulu: (30:5) + (2x4) = 6 + 8 = 14."},
-    {"soal": "15 + 15 : 3 - 2 = ...", "opsi": ["18", "8", "20", "12"], "jawaban": 0, "pembahasan": "Bagi dikerjakan dulu: 15 + 5 - 2 = 18."},
-    {"soal": "100 - (20 + 30) x 2 = ...", "opsi": ["100", "0", "40", "50"], "jawaban": 1, "pembahasan": "Kurung dulu: 50. Lalu kali: 50 x 2 = 100. Lalu 100 - 100 = 0."},
-    {"soal": "Bentuk desimal dari 1/4 adalah...", "opsi": ["0.14", "0.25", "0.40", "0.50"], "jawaban": 1, "pembahasan": "1/4 sama dengan 25/100 atau 0.25."},
-    {"soal": "50% dari Rp 120.000 adalah...", "opsi": ["Rp 50.000", "Rp 60.000", "Rp 70.000", "Rp 100.000"], "jawaban": 1, "pembahasan": "50% sama dengan setengahnya. 120.000 / 2 = 60.000."},
-    {"soal": "Pecahan paling sederhana dari 15/20 adalah...", "opsi": ["1/2", "2/3", "3/4", "4/5"], "jawaban": 2, "pembahasan": "Atas dan bawah sama-sama dibagi 5. Menjadi 3/4."},
-    {"soal": "0.5 + 1/2 = ...", "opsi": ["0.5", "1", "1.5", "2"], "jawaban": 1, "pembahasan": "1/2 adalah 0.5. Maka 0.5 + 0.5 = 1."},
-    {"soal": "Diskon 20% untuk barang seharga Rp 50.000. Berapa potongannya?", "opsi": ["Rp 5.000", "Rp 10.000", "Rp 15.000", "Rp 20.000"], "jawaban": 1, "pembahasan": "(20/100) x 50.000 = 10.000."},
-    {"soal": "2, 4, 6, 8, ...", "opsi": ["9", "10", "11", "12"], "jawaban": 1, "pembahasan": "Pola ditambah 2."},
-    {"soal": "3, 9, 27, 81, ...", "opsi": ["162", "243", "324", "100"], "jawaban": 1, "pembahasan": "Pola dikali 3. 81 x 3 = 243."},
-    {"soal": "100, 95, 85, 70, 50, ...", "opsi": ["25", "30", "35", "40"], "jawaban": 0, "pembahasan": "Pola pengurangan bertingkat: -5, -10, -15, -20. Selanjutnya -25. 50 - 25 = 25."},
-    {"soal": "1, 1, 2, 3, 5, 8, ...", "opsi": ["10", "11", "12", "13"], "jawaban": 3, "pembahasan": "Deret Fibonacci (menjumlahkan 2 angka sebelumnya). 5 + 8 = 13."},
-    {"soal": "2, 3, 6, 15, 42, ...", "opsi": ["84", "100", "123", "144"], "jawaban": 2, "pembahasan": "Selisihnya adalah 1, 3, 9, 27 (dikali 3). Selisih berikutnya 81. 42 + 81 = 123."},
-    {"soal": "Kamu menjual gula Rp12.000/kg. Jika pembeli membeli 3 kg dan membayar dengan uang Rp50.000, kembaliannya adalah...", "opsi": ["Rp 14.000", "Rp 16.000", "Rp 24.000", "Rp 36.000"], "jawaban": 0, "pembahasan": "Total belanja = 3 x 12.000 = 36.000. Kembalian = 50.000 - 36.000 = 14.000."},
-    {"soal": "Beli kopi 5 saset harganya Rp 10.000. Kalau beli 8 saset harganya berapa?", "opsi": ["Rp 12.000", "Rp 15.000", "Rp 16.000", "Rp 18.000"], "jawaban": 2, "pembahasan": "Harga 1 saset = 10.000 : 5 = 2.000. Harga 8 saset = 8 x 2.000 = 16.000."},
-    {"soal": "Pekerjaan selesai dalam 12 hari oleh 5 tukang. Jika dikerjakan 10 tukang, selesai dalam berapa hari?", "opsi": ["6 hari", "10 hari", "24 hari", "30 hari"], "jawaban": 0, "pembahasan": "Perbandingan berbalik nilai. Pekerja 2x lebih banyak, waktu 2x lebih cepat. 12 : 2 = 6 hari."},
-    {"soal": "Jarak stasiun A ke B 120 km. Kereta melaju 60 km/jam. Butuh waktu berapa jam?", "opsi": ["1 jam", "2 jam", "3 jam", "4 jam"], "jawaban": 1, "pembahasan": "Waktu = Jarak / Kecepatan. 120 / 60 = 2 jam."},
-    {"soal": "Andi berangkat pukul 07.00 dan menempuh perjalanan 2 jam. Pukul berapa ia tiba?", "opsi": ["08.00", "09.00", "10.00", "11.00"], "jawaban": 1, "pembahasan": "07.00 + 2 jam = 09.00."},
-    {"soal": "Jika 3 liter bensin bisa menempuh 30 km. Berapa liter yang dibutuhkan untuk 50 km?", "opsi": ["4 liter", "5 liter", "6 liter", "7 liter"], "jawaban": 1, "pembahasan": "1 liter = 10 km. 50 km membutuhkan 50 / 10 = 5 liter."},
-    {"soal": "Modal Rp 100.000, untung 20%. Berapa total uang sekarang?", "opsi": ["Rp 110.000", "Rp 120.000", "Rp 130.000", "Rp 150.000"], "jawaban": 1, "pembahasan": "Untung = 20.000. Total = 100.000 + 20.000 = 120.000."},
-    {"soal": "Baju seharga Rp 200.000 didiskon 50% + 20%. Harga akhirnya adalah...", "opsi": ["Rp 60.000", "Rp 70.000", "Rp 80.000", "Rp 90.000"], "jawaban": 2, "pembahasan": "Diskon 50% -> sisa 100.000. Diskon lagi 20% dari 100.000 -> dipotong 20.000. Akhir = 80.000."},
-    {"soal": "Andi mengecat rumah 3 hari, Budi mengecat 6 hari. Kalau dikerjakan bersama, selesai dalam...", "opsi": ["2 hari", "4.5 hari", "6 hari", "9 hari"], "jawaban": 0, "pembahasan": "(1/3) + (1/6) = 2/6 + 1/6 = 3/6. Dibalik menjadi 6/3 = 2 hari."},
-    {"soal": "Pak RT punya Rp100.000. 1/4 bagian untuk beli paku, 1/2 bagian untuk cat. Sisa uang Pak RT?", "opsi": ["Rp 15.000", "Rp 25.000", "Rp 50.000", "Rp 75.000"], "jawaban": 1, "pembahasan": "Paku = 25.000. Cat = 50.000. Sisa = 100.000 - 75.000 = 25.000."},
-    {"soal": "Semua pegawai memakai seragam. Andi adalah pegawai. Maka...", "opsi": ["Andi mungkin memakai seragam", "Andi memakai seragam", "Andi bukan pegawai", "Sebagian pegawai memakai seragam"], "jawaban": 1, "pembahasan": "Andi masuk kelompok pegawai, aturannya mutlak."},
-    {"soal": "Jika hujan, maka jalan basah. Hari ini jalan tidak basah. Maka...", "opsi": ["Hari ini hujan", "Hari ini mungkin hujan", "Hari ini tidak hujan", "Jalan kering karena panas"], "jawaban": 2, "pembahasan": "Modus Tollens: Akibat tidak ada, sebab tidak ada."},
-    {"soal": "Semua dokter pintar. Sebagian dokter suka membaca. Maka...", "opsi": ["Semua yang pintar suka membaca", "Sebagian dokter pintar", "Sebagian dokter pintar dan suka membaca", "Semua dokter pintar suka membaca"], "jawaban": 2, "pembahasan": "'Semua' bertemu 'Sebagian' kesimpulan pasti 'Sebagian'."},
-    {"soal": "Jika Budi lulus, dibelikan sepeda. Jika dibelikan sepeda, keliling kota. Budi tidak keliling kota. Maka...", "opsi": ["Budi lulus", "Budi tidak lulus", "Budi malas", "Budi dibelikan sepeda"], "jawaban": 1, "pembahasan": "Silogisme berantai mundur."},
-    {"soal": "Tidak ada pelaut yang penakut. Beberapa nelayan adalah penakut. Maka...", "opsi": ["Beberapa nelayan bukan pelaut", "Semua nelayan adalah pelaut", "Beberapa pelaut adalah nelayan", "Tidak ada nelayan yang berani"], "jawaban": 0, "pembahasan": "Nelayan penakut otomatis bukan pelaut."},
-    {"soal": "Lapar : Makan = Haus : ...", "opsi": ["Air", "Minum", "Gelas", "Es"], "jawaban": 1, "pembahasan": "Jika lapar butuh makan, jika haus butuh minum."},
-    {"soal": "Kayu : Lemari = Kain : ...", "opsi": ["Kapas", "Baju", "Jahit", "Benang"], "jawaban": 1, "pembahasan": "Kayu adalah bahan lemari. Kain adalah bahan baju."},
-    {"soal": "Masinis : Kereta Api = Nahkoda : ...", "opsi": ["Pesawat", "Mobil", "Kapal Laut", "Bus"], "jawaban": 2, "pembahasan": "Masinis menyetir kereta. Nahkoda menyetir kapal."},
-    {"soal": "Gandum : Roti : Makan = Benang : Pakaian : ...", "opsi": ["Jahit", "Pola", "Pakai", "Toko"], "jawaban": 2, "pembahasan": "Roti untuk dimakan. Pakaian untuk dipakai."},
-    {"soal": "Gempa Bumi : Tsunami = Hujan Deras : ...", "opsi": ["Banjir Bandang", "Mendung", "Payung", "Basah"], "jawaban": 0, "pembahasan": "Bencana memicu bencana ekstrem lainnya."},
-    {"soal": "1️⃣ ⬜ \n 2️⃣ ⬜ ⬜ \n 3️⃣ ⬜ ⬜ ⬜ \n ➡️ ❓", "opsi": ["⬜", "⬜ ⬜ ⬜ ⬜", "⬜ ⬜ ⬜ ⬜ ⬜", "⚫"], "jawaban": 1, "pembahasan": "Pola nambah 1 kotak."},
-    {"soal": "1️⃣ ⬆️ \n 2️⃣ ➡️ \n 3️⃣ ⬇️ \n ➡️ ❓", "opsi": ["⬆️", "➡️", "⬇️", "⬅️"], "jawaban": 3, "pembahasan": "Putar 90 derajat searah jarum jam."},
-    {"soal": "1️⃣ 🔺 \n 2️⃣ ◼️ \n 3️⃣ ⬟ \n ➡️ ❓", "opsi": ["🟠", "⬡", "⭐", "🔶"], "jawaban": 1, "pembahasan": "Nambah 1 sisi bangun datar."},
-    {"soal": "🔠 **b** 🪞 ❓", "opsi": ["p", "q", "d", "c"], "jawaban": 2, "pembahasan": "Cermin huruf 'b' memantul jadi 'd'."},
-    {"soal": "1️⃣ ⚫⚫ \n 2️⃣ ⚫⚫⚫⚫ \n 3️⃣ ⚫⚫⚫⚫⚫⚫ \n ➡️ ❓", "opsi": ["⚫⚫⚫⚫⚫⚫⚫", "⚫⚫⚫⚫⚫⚫⚫⚫", "⚫⚫⚫⚫⚫⚫⚫⚫⚫", "⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫"], "jawaban": 1, "pembahasan": "Ditambah 2 titik."},
-    {"soal": "Posisi: A duduk kanan B. C duduk kiri B. Siapa di tengah?", "opsi": ["A", "B", "C", "Tidak ada"], "jawaban": 1, "pembahasan": "Urutan C - B - A."},
-    {"soal": "Andi tidak Malam. Cici selalu Pagi. Doni setelah Andi. Budi Malam. Andi jaga kapan?", "opsi": ["Pagi", "Siang", "Sore", "Malam"], "jawaban": 1, "pembahasan": "Cici(Pagi), Budi(Malam). Sisa Siang & Sore. Andi(Siang), Doni(Sore)."},
-    {"soal": "Budi menyalip posisi kedua. Posisi Budi sekarang...", "opsi": ["Pertama", "Kedua", "Ketiga", "Keempat"], "jawaban": 1, "pembahasan": "Menyalip posisi kedua artinya menempati posisi kedua tersebut."},
-    {"soal": "Rumah Tono lebih jauh dari Tini. Tino lebih dekat dari Tini. Paling jauh?", "opsi": ["Tono", "Tini", "Tino", "Sama"], "jawaban": 0, "pembahasan": "Urutan: Tono(terjauh) - Tini - Tino."},
-    {"soal": "Kereta A berangkat 08.00 tiba 10.00. Kereta B berangkat 08.00 tiba 09.30. Mana lebih cepat?", "opsi": ["Kereta A", "Kereta B", "Sama saja", "Tidak tahu"], "jawaban": 1, "pembahasan": "Kereta B butuh 1.5 jam, Kereta A butuh 2 jam."}
-]
-
-soal_paket_2 = [
     {"soal": "12 x 15 = ...", "opsi": ["160", "170", "180", "190"], "jawaban": 2, "pembahasan": "10x15 = 150, ditambah 2x15 = 30. Hasil = 180."},
     {"soal": "144 : 12 = ...", "opsi": ["10", "12", "14", "16"], "jawaban": 1, "pembahasan": "Akar kuadrat dari 144 adalah 12."},
     {"soal": "25 + 15 x 4 - 10 = ...", "opsi": ["150", "100", "75", "65"], "jawaban": 2, "pembahasan": "Kali dulu: 15x4 = 60. Lalu 25 + 60 - 10 = 75."},
@@ -114,7 +60,10 @@ soal_paket_2 = [
     {"soal": "1️⃣ 🟩🔺 \n 2️⃣ 🟩🟩🔺 \n 3️⃣ 🟩🟩🟩🔺 \n ➡️ ❓", "opsi": ["🟩🟩🟩🟩🔺", "🟩🟩🔺🔺", "🟩🔺🟩🔺", "🔺🔺🔺🟩"], "jawaban": 0, "pembahasan": "Penambahan 1 kotak hijau setiap tahap."}
 ]
 
-soal_twk = [
+# ==============================================================================
+# 2. DATABASE SOAL PAKET 2 (SKD Nasional Lengkap - 110 Soal)
+# ==============================================================================
+soal_twk_2 = [
     {"soal": "Sila ke-4 Pancasila mengajarkan kita untuk mengutamakan musyawarah. Dalam kehidupan sehari-hari, hal ini paling tepat diterapkan saat...", "opsi": ["Menentukan menu makan siang", "Memilih ketua RT", "Menentukan tempat liburan pribadi", "Membeli barang kebutuhan pokok", "Tidur siang"], "jawaban": 1, "pembahasan": "Musyawarah dilakukan untuk keputusan bersama."},
     {"soal": "Menggunakan produk dalam negeri merupakan wujud dari nilai Pancasila ke...", "opsi": ["1", "2", "3", "4", "5"], "jawaban": 2, "pembahasan": "Sila ke-3 (Persatuan Indonesia) mencakup rasa cinta tanah air."},
     {"soal": "Tujuan utama dari amandemen UUD 1945 adalah untuk...", "opsi": ["Memperluas kekuasaan Presiden", "Menyesuaikan aturan dasar dengan perkembangan zaman", "Mengubah bentuk negara", "Membubarkan MPR", "Mengganti ideologi"], "jawaban": 1, "pembahasan": "Amandemen menyempurnakan aturan dasar, bukan mengubah dasar negara."},
@@ -147,7 +96,7 @@ soal_twk = [
     {"soal": "Membahayakan persatuan, KECUALI...", "opsi": ["Primordialisme", "Etnosentrisme", "Chauvinisme", "Patriotisme", "Separatisme"], "jawaban": 3, "pembahasan": "Patriotisme adalah cinta tanah air."}
 ]
 
-soal_tiu = [
+soal_tiu_2 = [
     {"soal": "85 + 15 x 2 - 10 = ...", "opsi": ["105", "190", "115", "100", "95"], "jawaban": 0, "pembahasan": "(15x2)=30. 85+30-10 = 105."},
     {"soal": "0,25 + 3/4 = ...", "opsi": ["0,5", "0,75", "1", "1,25", "1,5"], "jawaban": 2, "pembahasan": "3/4 = 0,75. 0,25 + 0,75 = 1."},
     {"soal": "2, 4, 8, 16, 32, ...", "opsi": ["48", "54", "64", "72", "80"], "jawaban": 2, "pembahasan": "Pola dikali 2."},
@@ -185,7 +134,7 @@ soal_tiu = [
     {"soal": "10 km dalam 15 menit. Kecepatan /jam?", "opsi": ["20", "30", "40", "50", "60"], "jawaban": 2, "pembahasan": "10 / (1/4) = 40."}
 ]
 
-soal_tkp = [
+soal_tkp_2 = [
     {"soal": "Sistem IT kantor mati total. Tindakan Anda...", "opsi": ["Pulang", "Marah", "Main HP", "Merapikan meja/arsip fisik", "Tidur"], "skor": [1, 2, 3, 5, 1]},
     {"soal": "Ada aturan datang 15 menit awal. Anda...", "opsi": ["Tolak", "Protes", "Patuhi terpaksa", "Taati sbg profesional", "Abaikan"], "skor": [1, 2, 3, 5, 1]},
     {"soal": "Pelanggan tanya layanan yg Anda tidak tahu. Anda...", "opsi": ["Asal jawab", "Tolak", "Kasih brosur", "Tanya rekan yg tahu", "Kabur"], "skor": [2, 1, 3, 5, 1]},
@@ -233,8 +182,35 @@ soal_tkp = [
     {"soal": "Pekerjaan monoton tiap hari...", "opsi": ["Bosankan", "Kerja lambat", "Main game", "Inovasi cara kerja baru", "Tetap fokus"], "skor": [1, 2, 1, 5, 4]}
 ]
 
+# ==============================================================================
+# 3. DATABASE SOAL PAKET 3 (SKD HOTS Ekstra)
+# ==============================================================================
+soal_twk_3 = [
+    {"soal": "Pasca amandemen UUD 1945, kekuasaan membentuk Undang-Undang yang sebelumnya dipegang oleh Presiden beralih kepada...", "opsi": ["MPR", "DPR", "Mahkamah Konstitusi", "DPD", "MA"], "jawaban": 1, "pembahasan": "Pasal 20 ayat (1) UUD 1945 setelah amandemen menegaskan bahwa DPR memegang kekuasaan membentuk undang-undang."},
+    {"soal": "Seorang ASN di kelurahan menolak memberikan pelayanan kepada warga yang berbeda agama dengannya. Tindakan ASN tersebut paling bertentangan dengan Pancasila sila ke...", "opsi": ["1", "2", "3", "4", "5"], "jawaban": 1, "pembahasan": "Sila ke-2 (Kemanusiaan yang Adil dan Beradab) menjunjung tinggi persamaan derajat, hak, dan kewajiban tanpa diskriminasi SARA dalam pelayanan kemanusiaan."},
+    {"soal": "Dalam sejarah diplomasi Indonesia, Perundingan Linggarjati memicu pro dan kontra di kalangan tokoh nasional karena...", "opsi": ["Belanda hanya mengakui Jawa, Sumatera, dan Madura", "Ibukota negara dipindah ke Yogyakarta", "Indonesia harus menanggung utang Hindia Belanda", "Pasukan TNI harus ditarik dari kantong gerilya", "Bentuk negara berubah menjadi serikat"], "jawaban": 0, "pembahasan": "Hasil Linggarjati mempersempit wilayah de facto RI hanya pada Jawa, Sumatera, dan Madura yang memicu kekecewaan berbagai pihak."},
+    {"soal": "Prinsip 'Nasionalisme' dalam kerangka wawasan nusantara tidak boleh mengarah pada...", "opsi": ["Patriotisme", "Chauvinisme", "Egalitarianisme", "Pluralisme", "Demokrasi"], "jawaban": 1, "pembahasan": "Chauvinisme adalah rasa cinta tanah air yang berlebihan hingga merendahkan bangsa lain, bertentangan dengan Pancasila."},
+    {"soal": "Mahkamah Konstitusi berwenang memutus pembubaran partai politik. Wewenang ini diberikan untuk menjaga stabilitas dari ancaman...", "opsi": ["Krisis ekonomi", "Intervensi asing", "Ideologi yang bertentangan dengan UUD 1945", "Korupsi massal", "Sengketa pemilu"], "jawaban": 2, "pembahasan": "Pembubaran parpol dilakukan jika asas, ciri, atau kegiatan parpol tersebut terbukti bertentangan dengan Pancasila dan UUD 1945."}
+]
+
+soal_tiu_3 = [
+    {"soal": "Semua pekerja proyek memakai helm pengaman. Beberapa mahasiswa teknik adalah pekerja proyek. Kesimpulannya...", "opsi": ["Semua mahasiswa teknik memakai helm pengaman", "Beberapa mahasiswa teknik memakai helm pengaman", "Semua pekerja proyek adalah mahasiswa teknik", "Tidak ada mahasiswa teknik yang memakai helm", "Semua yang memakai helm adalah mahasiswa"], "jawaban": 1, "pembahasan": "Hukum Silogisme: Jika Premis 1 'Semua' dan Premis 2 'Beberapa', kesimpulannya pasti 'Beberapa'."},
+    {"soal": "Jika hujan lebat, maka bendungan meluap. Jika bendungan meluap, maka desa A banjir. Saat ini desa A tidak banjir. Kesimpulannya...", "opsi": ["Hujan tidak lebat", "Bendungan tetap meluap", "Desa A kemarau", "Hujan lebat tapi tidak banjir", "Warga desa A mengungsi"], "jawaban": 0, "pembahasan": "Modus Tollens Berantai. P -> Q, Q -> R. Kesimpulan: P -> R. Jika ~R (tidak banjir), maka ~P (hujan tidak lebat)."},
+    {"soal": "2, 5, 11, 23, 47, ...", "opsi": ["92", "94", "95", "96", "98"], "jawaban": 2, "pembahasan": "Pola deret: (Angka sebelumnya x 2) + 1. (47 x 2) + 1 = 94 + 1 = 95."},
+    {"soal": "A, D, H, M, ...", "opsi": ["S", "T", "U", "V", "R"], "jawaban": 0, "pembahasan": "Lompatan huruf makin bertambah: A(+3)D, D(+4)H, H(+5)M, M(+6)S."},
+    {"soal": "Sebuah bak air dapat penuh jika diisi pipa A selama 3 jam, atau pipa B selama 6 jam. Jika kedua pipa dibuka bersamaan, bak akan penuh dalam...", "opsi": ["1,5 jam", "2 jam", "2,5 jam", "3 jam", "4 jam"], "jawaban": 1, "pembahasan": "1/Total = 1/3 + 1/6 = 2/6 + 1/6 = 3/6. Total = 6/3 = 2 jam."}
+]
+
+soal_tkp_3 = [
+    {"soal": "Sistem presensi kantor Anda baru saja diganti dari sidik jari ke aplikasi pengenal wajah berbasis GPS. Anda sering kesulitan login karena sinyal buruk di area rumah Anda...", "opsi": ["Memprotes kebijakan tersebut ke pihak HRD agar dikembalikan ke sistem lama", "Berangkat lebih awal agar bisa login di area yang sinyalnya stabil", "Menitip presensi pada teman yang sudah di kantor", "Mengabaikan sistem baru dan tetap datang tepat waktu tanpa absen", "Mengeluhkan aplikasi tersebut di grup WhatsApp divisi"], "skor": [3, 5, 1, 2, 1]},
+    {"soal": "Anda menemukan sebuah artikel di media sosial yang menjelek-jelekkan kebijakan instansi tempat Anda bekerja tanpa data yang valid. Reaksi Anda...", "opsi": ["Ikut mengkritik karena merasa kebijakan tersebut memang menyusahkan", "Menghubungi pembuat artikel dan memakinya", "Mengabaikannya karena tidak ingin memicu konflik di kolom komentar", "Melaporkan artikel tersebut ke humas instansi sambil memberikan tautannya", "Menulis komentar balasan dengan menyertakan fakta dan data resmi dari instansi"], "skor": [1, 1, 3, 4, 5]},
+    {"soal": "Rekan kerja Anda sering bercanda dengan melontarkan ujaran kebencian terhadap kelompok minoritas tertentu. Suatu hari ia melakukannya di ruang rapat sebelum rapat dimulai...", "opsi": ["Tertawa agar ia tidak merasa canggung", "Meninggalkan ruang rapat sampai rapat dimulai", "Menegurnya secara empat mata setelah rapat selesai agar ia menghentikan kebiasaan itu", "Mengalihkan pembicaraan ke topik pekerjaan secara elegan di depan forum", "Melaporkannya langsung ke atasan agar ia dipecat"], "skor": [1, 3, 5, 4, 2]},
+    {"soal": "Anda ditugaskan memimpin tim lintas divisi. Namun, dua anggota inti Anda berasal dari divisi yang sedang berseteru dan mereka saling mendiamkan...", "opsi": ["Mengembalikan mereka ke divisi masing-masing dan meminta pengganti", "Mengerjakan tugas mereka berdua sendirian agar proyek cepat selesai", "Mengadakan pertemuan santai di luar jam kerja untuk mencairkan suasana", "Menegaskan target kerja secara profesional dan membagi tugas secara independen agar tidak saling bergantung", "Mengingatkan visi utama proyek dan meminta mereka menyingkirkan ego sektoral demi institusi"], "skor": [2, 1, 3, 4, 5]},
+    {"soal": "Batas waktu pengumpulan laporan tinggal 2 jam lagi, namun data penting dari cabang daerah belum juga masuk karena kendala cuaca...", "opsi": ["Menunggu santai karena itu bukan kesalahan Anda", "Menghubungi atasan untuk meminta perpanjangan waktu dengan alasan cuaca", "Menyusun kerangka laporan semaksimal mungkin, lalu menelepon cabang untuk meminta data inti via suara", "Marah-marah kepada staf cabang", "Membuat estimasi data palsu agar laporan selesai tepat waktu"], "skor": [2, 4, 5, 1, 1]}
+]
+
 # ==========================================
-# 2. INISIALISASI STATE
+# 4. INISIALISASI STATE
 # ==========================================
 if 'ujian_dimulai' not in st.session_state:
     st.session_state.ujian_dimulai = False
@@ -245,23 +221,23 @@ if 'waktu_selesai' not in st.session_state:
 if 'telah_submit' not in st.session_state:
     st.session_state.telah_submit = False
 if 'pilihan_paket' not in st.session_state:
-    st.session_state.pilihan_paket = "Paket 1: TIU Dasar (50 Soal)"
+    st.session_state.pilihan_paket = "Paket 1: TIU Lanjutan (50 Soal / 60 Menit)"
 if 'jawaban_user' not in st.session_state:
     st.session_state.jawaban_user = {}
 
 # ==========================================
-# 3. LOGIKA UI: MENU UTAMA (SEBELUM UJIAN)
+# 5. LOGIKA UI: MENU UTAMA
 # ==========================================
 if not st.session_state.ujian_dimulai:
     st.title("📚 Pusat Pelatihan TPA & SKD Nasional")
     st.markdown("---")
     
     st.session_state.pilihan_paket = st.radio(
-        "Pilih Modul Ujian (Semua Soal Sudah Diperbarui Penuh):",
+        "Pilih Modul Ujian Terpadu:",
         [
-            "Paket 1: TIU Dasar (50 Soal / 60 Menit)", 
-            "Paket 2: TIU Lanjutan (50 Soal / 60 Menit)", 
-            "Paket 3: SKD Nasional Lengkap (110 Soal / 100 Menit)"
+            "Paket 1: TIU Lanjutan (50 Soal / 60 Menit)", 
+            "Paket 2: SKD Nasional Lengkap (110 Soal / 100 Menit)",
+            "Paket 3: SKD HOTS Ekstra (Soal Latihan / 100 Menit)" 
         ]
     )
     
@@ -273,20 +249,19 @@ if not st.session_state.ujian_dimulai:
         st.rerun()
 
 # ==========================================
-# 4. LOGIKA UI: SAAT UJIAN BERJALAN
+# 6. LOGIKA UI: SAAT UJIAN BERJALAN
 # ==========================================
 else:
     if not st.session_state.telah_submit:
         
-        # --- A. PENGATURAN WAKTU & TIMER ---
-        if "Paket 3" in st.session_state.pilihan_paket:
-            durasi_ujian = 6000  # 100 Menit
-        else:
-            durasi_ujian = 3600  # 60 Menit
+        # Cek tipe ujian: Apakah ini SKD (Paket 2 / 3) atau TIU murni (Paket 1)?
+        is_skd = "SKD" in st.session_state.pilihan_paket
+        durasi_ujian = 6000 if is_skd else 3600
             
         waktu_berjalan = time.time() - st.session_state.waktu_mulai
         sisa_waktu_detik = int(durasi_ujian - waktu_berjalan)
         
+        # Injeksi Javascript Timer
         js_timer = f"""
         <script>
             var sisaWaktu = {sisa_waktu_detik};
@@ -325,107 +300,83 @@ else:
         """
         components.html(js_timer, height=0, width=0)
 
-        # --- B. RENDER SOAL (DENGAN PENOMORAN OTOMATIS BERURUTAN) ---
         st.subheader(f"Mengerjakan: {st.session_state.pilihan_paket}")
         st.markdown("---")
         
         with st.form(key='form_ujian'):
             jawaban_sementara = {}
             
-            if "Paket 1" in st.session_state.pilihan_paket or "Paket 2" in st.session_state.pilihan_paket:
-                soal_aktif = soal_paket_1 if "Paket 1" in st.session_state.pilihan_paket else soal_paket_2
-                for i, item in enumerate(soal_aktif):
+            if not is_skd:
+                # UNTUK PAKET 1
+                for i, item in enumerate(soal_paket_1):
                     st.markdown(f"**{i+1}. {item['soal']}**")
-                    pilihan = st.radio(label=f"Soal {i}", options=item["opsi"], index=None, label_visibility="collapsed", key=f"tiu_{i}")
-                    jawaban_sementara[f"tiu_{i}"] = pilihan
+                    jawaban_sementara[f"tiu_{i}"] = st.radio(label=f"Soal {i}", options=item["opsi"], index=None, label_visibility="collapsed")
                     st.write("")
                     
-            elif "Paket 3" in st.session_state.pilihan_paket:
+            else:
+                # UNTUK PAKET 2 DAN PAKET 3 SECARA DINAMIS
+                if "Paket 3" in st.session_state.pilihan_paket:
+                    aktif_twk, aktif_tiu, aktif_tkp = soal_twk_3, soal_tiu_3, soal_tkp_3
+                else:
+                    aktif_twk, aktif_tiu, aktif_tkp = soal_twk_2, soal_tiu_2, soal_tkp_2
+
                 st.markdown("#### Bagian I: TWK (Tes Wawasan Kebangsaan)")
-                # Nomor urut TWK dari 1 - 30
-                for i, item in enumerate(soal_twk):
-                    nomor_soal = i + 1
-                    st.markdown(f"**{nomor_soal}. {item['soal']}**")
-                    pilihan = st.radio(label=f"TWK {i}", options=item["opsi"], index=None, label_visibility="collapsed", key=f"twk_{i}")
-                    jawaban_sementara[f"twk_{i}"] = pilihan
+                for i, item in enumerate(aktif_twk):
+                    st.markdown(f"**{i+1}. {item['soal']}**")
+                    jawaban_sementara[f"twk_{i}"] = st.radio(label=f"TWK {i}", options=item["opsi"], index=None, label_visibility="collapsed")
                     st.write("")
                     
                 st.markdown("#### Bagian II: TIU (Tes Intelegensia Umum)")
-                # Nomor urut TIU melompat secara otomatis melanjutkan TWK (Mulai 31)
-                offset_tiu = len(soal_twk)
-                for i, item in enumerate(soal_tiu):
-                    nomor_soal = offset_tiu + i + 1
-                    st.markdown(f"**{nomor_soal}. {item['soal']}**")
-                    pilihan = st.radio(label=f"TIU {i}", options=item["opsi"], index=None, label_visibility="collapsed", key=f"tiu_skd_{i}")
-                    jawaban_sementara[f"tiu_skd_{i}"] = pilihan
+                offset_tiu = len(aktif_twk)
+                for i, item in enumerate(aktif_tiu):
+                    st.markdown(f"**{offset_tiu + i + 1}. {item['soal']}**")
+                    jawaban_sementara[f"tiu_skd_{i}"] = st.radio(label=f"TIU {i}", options=item["opsi"], index=None, label_visibility="collapsed")
                     st.write("")
                     
                 st.markdown("#### Bagian III: TKP (Tes Karakteristik Pribadi)")
-                # Nomor urut TKP melompat melanjutkan TIU (Mulai 66)
-                offset_tkp = offset_tiu + len(soal_tiu)
-                for i, item in enumerate(soal_tkp):
-                    nomor_soal = offset_tkp + i + 1
-                    st.markdown(f"**{nomor_soal}. {item['soal']}**")
-                    pilihan = st.radio(label=f"TKP {i}", options=item["opsi"], index=None, label_visibility="collapsed", key=f"tkp_{i}")
-                    jawaban_sementara[f"tkp_{i}"] = pilihan
+                offset_tkp = offset_tiu + len(aktif_tiu)
+                for i, item in enumerate(aktif_tkp):
+                    st.markdown(f"**{offset_tkp + i + 1}. {item['soal']}**")
+                    jawaban_sementara[f"tkp_{i}"] = st.radio(label=f"TKP {i}", options=item["opsi"], index=None, label_visibility="collapsed")
                     st.write("")
 
             submit_button = st.form_submit_button(label='Kumpulkan Jawaban', use_container_width=True)
 
-        # --- C. LOGIKA PENILAIAN ---
+        # PENILAIAN
         if submit_button:
             st.session_state.waktu_selesai = time.time()
             st.session_state.telah_submit = True
             st.session_state.jawaban_user = jawaban_sementara
-            
-            if "Paket 1" in st.session_state.pilihan_paket or "Paket 2" in st.session_state.pilihan_paket:
-                soal_aktif = soal_paket_1 if "Paket 1" in st.session_state.pilihan_paket else soal_paket_2
-                benar = sum([1 for i, item in enumerate(soal_aktif) if jawaban_sementara.get(f"tiu_{i}") == item["opsi"][item["jawaban"]]])
-                st.session_state.skor_tiu = (benar / len(soal_aktif)) * 100
-                st.session_state.benar = benar
-                st.session_state.salah = len(soal_aktif) - benar
-                
-            elif "Paket 3" in st.session_state.pilihan_paket:
-                skor_twk, skor_tiu, skor_tkp = 0, 0, 0
-                for i, item in enumerate(soal_twk):
-                    if jawaban_sementara.get(f"twk_{i}") == item["opsi"][item["jawaban"]]: skor_twk += 5
-                for i, item in enumerate(soal_tiu):
-                    if jawaban_sementara.get(f"tiu_skd_{i}") == item["opsi"][item["jawaban"]]: skor_tiu += 5
-                for i, item in enumerate(soal_tkp):
-                    jawaban = jawaban_sementara.get(f"tkp_{i}")
-                    if jawaban: skor_tkp += item["skor"][item["opsi"].index(jawaban)]
-                        
-                st.session_state.skor_twk = skor_twk
-                st.session_state.skor_tiu = skor_tiu
-                st.session_state.skor_tkp = skor_tkp
-
             st.rerun()
 
 # ==========================================
-# 5. LOGIKA UI: HASIL EVALUASI
+# 7. LOGIKA UI: HASIL EVALUASI
 # ==========================================
 if st.session_state.telah_submit:
-    remove_js = "<script>var timerElement = window.parent.document.getElementById('custom_timer_display'); if (timerElement) { timerElement.remove(); }</script>"
-    components.html(remove_js, height=0, width=0)
+    components.html("<script>var t = window.parent.document.getElementById('custom_timer_display'); if(t) t.remove();</script>", height=0, width=0)
 
+    is_skd = "SKD" in st.session_state.pilihan_paket
     durasi_detik = int(st.session_state.waktu_selesai - st.session_state.waktu_mulai)
-    if ("Paket 3" in st.session_state.pilihan_paket and durasi_detik >= 6000) or ("Paket 3" not in st.session_state.pilihan_paket and durasi_detik >= 3600):
+    
+    if (is_skd and durasi_detik >= 6000) or (not is_skd and durasi_detik >= 3600):
         st.error("⏰ WAKTU HABIS! Jawaban dikumpulkan otomatis.")
     else:
         st.success(f"⏱️ Waktu Terpakai: {durasi_detik // 60} Menit {durasi_detik % 60} Detik")
 
-    st.title("HASIL EVALUASI")
+    st.title("📊 HASIL EVALUASI")
     st.markdown("---")
 
-    if "Paket 1" in st.session_state.pilihan_paket or "Paket 2" in st.session_state.pilihan_paket:
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Skor Total", f"{st.session_state.skor_tiu:g} / 100")
-        col2.metric("Jawaban Benar", st.session_state.benar)
-        col3.metric("Jawaban Salah/Kosong", st.session_state.salah)
+    if not is_skd:
+        benar = sum([1 for i, item in enumerate(soal_paket_1) if st.session_state.jawaban_user.get(f"tiu_{i}") == item["opsi"][item["jawaban"]]])
+        salah = len(soal_paket_1) - benar
         
-        st.markdown("### Daftar Jawaban yang Salah:")
-        soal_aktif = soal_paket_1 if "Paket 1" in st.session_state.pilihan_paket else soal_paket_2
-        for i, item in enumerate(soal_aktif):
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Skor Akhir", f"{int((benar / len(soal_paket_1)) * 100)}")
+        c2.metric("Benar", benar)
+        c3.metric("Salah/Kosong", salah)
+        
+        st.markdown("### Daftar Evaluasi Soal (Yang Salah)")
+        for i, item in enumerate(soal_paket_1):
             j_user = st.session_state.jawaban_user.get(f"tiu_{i}")
             j_benar = item["opsi"][item["jawaban"]]
             if j_user != j_benar:
@@ -435,17 +386,40 @@ if st.session_state.telah_submit:
                     st.write(f"✅ **Jawaban Benar:** {j_benar}")
                     st.info(f"**Pembahasan:** {item['pembahasan']}")
 
-    elif "Paket 3" in st.session_state.pilihan_paket:
-        total_skor = st.session_state.skor_twk + st.session_state.skor_tiu + st.session_state.skor_tkp
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("SKOR TOTAL", f"{total_skor} / 550")
-        col2.metric("TWK", f"{st.session_state.skor_twk} / 150")
-        col3.metric("TIU", f"{st.session_state.skor_tiu} / 175")
-        col4.metric("TKP", f"{st.session_state.skor_tkp} / 225")
+    else:
+        if "Paket 3" in st.session_state.pilihan_paket:
+            aktif_twk, aktif_tiu, aktif_tkp = soal_twk_3, soal_tiu_3, soal_tkp_3
+        else:
+            aktif_twk, aktif_tiu, aktif_tkp = soal_twk_2, soal_tiu_2, soal_tkp_2
+
+        skor_twk, skor_tiu, skor_tkp = 0, 0, 0
         
-        st.markdown("### Evaluasi TWK & TIU (Yang Salah)")
-        offset_tiu = len(soal_twk)
-        for i, item in enumerate(soal_twk):
+        for i, item in enumerate(aktif_twk):
+            if st.session_state.jawaban_user.get(f"twk_{i}") == item["opsi"][item["jawaban"]]: skor_twk += 5
+        for i, item in enumerate(aktif_tiu):
+            if st.session_state.jawaban_user.get(f"tiu_skd_{i}") == item["opsi"][item["jawaban"]]: skor_tiu += 5
+        for i, item in enumerate(aktif_tkp):
+            jwb = st.session_state.jawaban_user.get(f"tkp_{i}")
+            if jwb: skor_tkp += item["skor"][item["opsi"].index(jwb)]
+
+        total_skor = skor_twk + skor_tiu + skor_tkp
+        lulus = (skor_twk >= 65) and (skor_tiu >= 80) and (skor_tkp >= 166)
+
+        if lulus:
+            st.success(f"🎉 SELAMAT! Anda **MEMENUHI PASSING GRADE** dengan Total Skor {total_skor}")
+        else:
+            st.error(f"❌ Anda **BELUM MEMENUHI PASSING GRADE**. Total Skor: {total_skor}")
+
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("TOTAL SKOR", total_skor)
+        c2.metric("TWK", f"{skor_twk}", delta="Ambang: 65", delta_color="off" if skor_twk >= 65 else "inverse")
+        c3.metric("TIU", f"{skor_tiu}", delta="Ambang: 80", delta_color="off" if skor_tiu >= 80 else "inverse")
+        c4.metric("TKP", f"{skor_tkp}", delta="Ambang: 166", delta_color="off" if skor_tkp >= 166 else "inverse")
+        
+        st.markdown("### Daftar Evaluasi Soal (Yang Salah / Poin Kurang)")
+        
+        # Evaluasi TWK
+        for i, item in enumerate(aktif_twk):
             j_user = st.session_state.jawaban_user.get(f"twk_{i}")
             j_benar = item["opsi"][item["jawaban"]]
             if j_user != j_benar:
@@ -454,8 +428,10 @@ if st.session_state.telah_submit:
                     st.write(f"❌ **Jawabanmu:** {j_user if j_user else 'Kosong'}")
                     st.write(f"✅ **Jawaban Benar:** {j_benar}")
                     st.info(f"**Pembahasan:** {item['pembahasan']}")
-        
-        for i, item in enumerate(soal_tiu):
+                    
+        # Evaluasi TIU
+        offset_tiu = len(aktif_twk)
+        for i, item in enumerate(aktif_tiu):
             j_user = st.session_state.jawaban_user.get(f"tiu_skd_{i}")
             j_benar = item["opsi"][item["jawaban"]]
             if j_user != j_benar:
@@ -464,10 +440,10 @@ if st.session_state.telah_submit:
                     st.write(f"❌ **Jawabanmu:** {j_user if j_user else 'Kosong'}")
                     st.write(f"✅ **Jawaban Benar:** {j_benar}")
                     st.info(f"**Pembahasan:** {item['pembahasan']}")
-        
-        st.markdown("### Evaluasi TKP (Tidak mendapat Poin Maksimal 5)")
-        offset_tkp = offset_tiu + len(soal_tiu)
-        for i, item in enumerate(soal_tkp):
+                    
+        # Evaluasi TKP
+        offset_tkp = offset_tiu + len(aktif_tiu)
+        for i, item in enumerate(aktif_tkp):
             j_user = st.session_state.jawaban_user.get(f"tkp_{i}")
             poin = item["skor"][item["opsi"].index(j_user)] if j_user else 0
             if poin < 5:
@@ -476,11 +452,9 @@ if st.session_state.telah_submit:
                     st.write(f"**Soal:** {item['soal']}")
                     st.write(f"**Pilihanmu:** {j_user if j_user else 'Kosong'}")
                     st.write(f"**Tindakan Terbaik (Poin 5):** {terbaik}")
-                    if "pembahasan" in item: st.info(f"**Pembahasan:** {item['pembahasan']}")
 
     st.markdown("---")
     if st.button("Kembali ke Menu Utama"):
         st.session_state.ujian_dimulai = False
         st.session_state.telah_submit = False
         st.rerun()
-4
