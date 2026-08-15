@@ -121,7 +121,7 @@ soal_tkp_lengkap = [
     {"soal": "Proyek besar harus berjalan namun anggaran dana dari instansi sangat minim...", "opsi": ["Membatalkan seluruh kegiatan proyek", "Meminta iuran paksa kepada warga/rekan", "Menggunakan uang pribadi tanpa kejelasan", "Mencari alternatif sponsor atau mitra kerja sama legal", "Melakukan optimasi anggaran secara efisien dan kreatif"], "skor": [1, 1, 3, 4, 5]},
     {"soal": "Ketua tim Anda terkesan pilih kasih dalam membagikan tugas dan fasilitas...", "opsi": ["Mengadakan aksi demonstrasi di kantor", "Mengajukan surat pengunduran diri", "Mengeluh di media sosial", "Membuktikan kualitas diri melalui prestasi kerja", "Mengajak ketua tim berdiskusi secara profesional dan terbuka"], "skor": [1, 1, 2, 4, 5]},
     {"soal": "Terjadi perdebatan argumen yang sangat panas antar anggota dalam rapat tim...", "opsi": ["Walk out meninggalkan ruangan rapat", "Ikut berteriak-teriak melampiaskan emosi", "Diam aman tidak bersuara", "Memisahkan pihak yang berdebat", "Menengahi perdebatan dan memfasilitasi titik temu solusi"], "skor": [1, 1, 2, 4, 5]},
-    {"soal": "Jaringan internet kantor terputus total saat batas waktu pengiriman laporan krusial...", "opsi": ["Panik berlebihan dan menangis", "Menyalahkan penyedia layanan internet (provider)", "Menggunakan koneksi tethering handphone pribadi secara mandiri", "Segera mencari lokasi atau ruangan dengan jaringan alternatif terdekat", "Membiarkan laporan terlambat terkumpul"], "skor": [1, 1, 2, 4, 5]},
+    {"soal": "Jaringan internet kantor terputus total saat batas waktu pengiriman laporan krusial...", "opsi": ["Panik berlebihan dan menangis", "Menyalahkan penyedia layanan internet (provider)", "Menggunakan koneksi tethering handphone pribadi secara mandiri", "Segera mencari lokasi atau ruangan dengan jaringan alternatif terdekat", "Membiarkan laporan terlambat terkumpul"], "skor": [1, 1, 5, 4, 1]},
     {"soal": "Anda mendapatkan promosi jabatan kenaikan pangkat, namun rekan terdekat Anda merasa iri...", "opsi": ["Menyombongkan diri di hadapannya", "Menjauhi rekan tersebut secara permanen", "Bersikap biasa saja seperti tidak terjadi apa-apa", "Mentraktirnya makan secara terpaksa", "Tetap rendah hati, ramah, dan merangkulnya seperti biasa"], "skor": [1, 2, 3, 2, 5]},
     {"soal": "Atasan menyuruh Anda membelikan barang kebutuhan pribadi keluarganya menggunakan jam kerja kantor...", "opsi": ["Marah dan membentak atasan", "Menolak dengan kata-kata kasar", "Melaporkan langsung ke bagian disiplin", "Mengerjakannya demi mencari muka", "Menolak secara halus dengan alasan sedang fokus menyelesaikan tugas kedinasan"], "skor": [2, 3, 4, 1, 5]},
     {"soal": "Pekerjaan harian di kantor terasa sangat monoton dan tidak ada tantangan baru...", "opsi": ["Merasa bosan dan malas-malasan bekerja", "Mengerjakan tugas dengan sangat lambat", "Bermain game di komputer kantor", "Tetap fokus menjaga kualitas kerja", "Mencari bentuk inovasi atau metode baru yang lebih efektif untuk menyelesaikan tugas tersebut"], "skor": [1, 2, 1, 5, 4]}
@@ -232,36 +232,149 @@ if st.session_state.telah_submit:
     st.markdown("---")
 
     skor_twk, skor_tiu, skor_tkp = 0, 0, 0
+    review_twk, review_tiu, review_tkp = [], [], []
+    benar_twk, benar_tiu, maks_tkp = 0, 0, 0
     
     # Hitung TWK (Benar=5, Salah=0)
     for i, item in enumerate(soal_twk_lengkap):
-        if st.session_state.jawaban_user.get(f"twk_{i}") == item["opsi"][item["jawaban"]]: 
+        jwb = st.session_state.jawaban_user.get(f"twk_{i}")
+        kunci = item["opsi"][item["jawaban"]]
+        benar = (jwb == kunci)
+        if benar: 
             skor_twk += 5
+            benar_twk += 1
+        review_twk.append({
+            "no": i + 1,
+            "soal": item["soal"],
+            "jawaban_user": jwb,
+            "kunci": kunci,
+            "pembahasan": item["pembahasan"],
+            "benar": benar
+        })
             
     # Hitung TIU (Benar=5, Salah=0)
     for i, item in enumerate(soal_tiu_lengkap):
-        if st.session_state.jawaban_user.get(f"tiu_{i}") == item["opsi"][item["jawaban"]]: 
+        jwb = st.session_state.jawaban_user.get(f"tiu_{i}")
+        kunci = item["opsi"][item["jawaban"]]
+        benar = (jwb == kunci)
+        if benar: 
             skor_tiu += 5
+            benar_tiu += 1
+        review_tiu.append({
+            "no": i + 31,
+            "soal": item["soal"],
+            "jawaban_user": jwb,
+            "kunci": kunci,
+            "pembahasan": item["pembahasan"],
+            "benar": benar
+        })
             
     # Hitung TKP (Skor 1-5)
     for i, item in enumerate(soal_tkp_lengkap):
         jwb = st.session_state.jawaban_user.get(f"tkp_{i}")
+        skor_maks = max(item["skor"])
+        idx_terbaik = item["skor"].index(skor_maks)
+        opsi_terbaik = item["opsi"][idx_terbaik]
         if jwb: 
-            skor_tkp += item["skor"][item["opsi"].index(jwb)]
+            nilai_pilihan = item["skor"][item["opsi"].index(jwb)]
+            skor_tkp += nilai_pilihan
+        else:
+            nilai_pilihan = 0
+        benar = (nilai_pilihan == skor_maks)
+        if benar:
+            maks_tkp += 1
+        review_tkp.append({
+            "no": i + 66,
+            "soal": item["soal"],
+            "jawaban_user": jwb,
+            "nilai_pilihan": nilai_pilihan,
+            "opsi_terbaik": opsi_terbaik,
+            "skor_maks": skor_maks,
+            "benar": benar
+        })
 
     total_skor = skor_twk + skor_tiu + skor_tkp
     lulus = (skor_twk >= 65) and (skor_tiu >= 80) and (skor_tkp >= 166)
 
+    # ---- Konversi Nilai ke Rentang 0 - 100 ----
+    nilai_100 = round(total_skor / 550 * 100, 2)
+    nilai_twk_100 = round(skor_twk / 150 * 100, 2)
+    nilai_tiu_100 = round(skor_tiu / 175 * 100, 2)
+    nilai_tkp_100 = round(skor_tkp / 225 * 100, 2)
+
     if lulus:
-        st.success(f"🎉 LUAR BIASA! Anda **MEMENUHI PASSING GRADE** dengan Total Skor {total_skor} (Maks: 550)")
+        st.success(f"🎉 LUAR BIASA! Anda **MEMENUHI PASSING GRADE** dengan Total Skor {total_skor} (Maks: 550) | Nilai: {nilai_100} / 100")
     else:
-        st.error(f"❌ Sayang sekali, Anda **BELUM MEMENUHI PASSING GRADE**. Total Skor: {total_skor}")
+        st.error(f"❌ Sayang sekali, Anda **BELUM MEMENUHI PASSING GRADE**. Total Skor: {total_skor} | Nilai: {nilai_100} / 100")
 
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("SKOR TOTAL", f"{total_skor}")
     c2.metric("TWK", f"{skor_twk} / 150", delta="Ambang: 65", delta_color="off" if skor_twk >= 65 else "inverse")
     c3.metric("TIU", f"{skor_tiu} / 175", delta="Ambang: 80", delta_color="off" if skor_tiu >= 80 else "inverse")
     c4.metric("TKP", f"{skor_tkp} / 225", delta="Ambang: 166", delta_color="off" if skor_tkp >= 166 else "inverse")
+
+    st.markdown("---")
+    st.subheader("🎯 Nilai Akhir Skala 0 - 100")
+    n1, n2, n3, n4 = st.columns(4)
+    n1.metric("NILAI AKHIR", f"{nilai_100}")
+    n2.metric("Nilai TWK", f"{nilai_twk_100}")
+    n3.metric("Nilai TIU", f"{nilai_tiu_100}")
+    n4.metric("Nilai TKP", f"{nilai_tkp_100}")
+    st.progress(min(nilai_100 / 100, 1.0))
+    st.caption(f"Konversi: Total Skor {total_skor} dibagi Skor Maksimal 550, dikali 100. Jawaban benar TWK: {benar_twk}/30 | TIU: {benar_tiu}/35 | TKP skor maksimal: {maks_tkp}/45.")
+
+    st.markdown("---")
+    st.subheader("📝 Pembahasan & Evaluasi Seluruh Soal")
+
+    filter_review = st.radio(
+        "Tampilkan soal:",
+        ["Semua Soal", "Hanya Jawaban Benar", "Hanya Jawaban Salah"],
+        horizontal=True
+    )
+
+    def lolos_filter(d):
+        if filter_review == "Hanya Jawaban Benar":
+            return d["benar"]
+        if filter_review == "Hanya Jawaban Salah":
+            return not d["benar"]
+        return True
+
+    def tampilkan_review_kunci(daftar, nama_bagian, jumlah_soal):
+        data = [d for d in daftar if lolos_filter(d)]
+        with st.expander(f"{nama_bagian} — menampilkan {len(data)} dari {jumlah_soal} soal"):
+            if not data:
+                st.info("Tidak ada soal yang sesuai dengan filter yang dipilih.")
+            for d in data:
+                if d["benar"]:
+                    st.markdown(f"**No. {d['no']}. {d['soal']}**")
+                    st.markdown(f"✅ Jawaban Anda: **{d['jawaban_user']}** — BENAR (skor 5)")
+                    st.success(f"💡 Mengapa benar: {d['pembahasan']}")
+                else:
+                    st.markdown(f"**No. {d['no']}. {d['soal']}**")
+                    st.markdown(f"❌ Jawaban Anda: **{d['jawaban_user'] if d['jawaban_user'] else '(Tidak dijawab)'}** — SALAH (skor 0)")
+                    st.markdown(f"✅ Kunci Jawaban: **{d['kunci']}**")
+                    st.info(f"💡 Mengapa kunci itu benar: {d['pembahasan']}")
+                st.markdown("---")
+
+    def tampilkan_review_tkp(daftar, nama_bagian, jumlah_soal):
+        data = [d for d in daftar if lolos_filter(d)]
+        with st.expander(f"{nama_bagian} — menampilkan {len(data)} dari {jumlah_soal} soal"):
+            if not data:
+                st.info("Tidak ada soal yang sesuai dengan filter yang dipilih.")
+            for d in data:
+                st.markdown(f"**No. {d['no']}. {d['soal']}**")
+                if d["benar"]:
+                    st.markdown(f"✅ Jawaban Anda: **{d['jawaban_user']}** — SKOR MAKSIMAL ({d['skor_maks']})")
+                    st.success("💡 Mengapa bernilai tertinggi: pilihan ini paling mencerminkan inisiatif, profesionalisme, dan penyelesaian masalah secara tuntas tanpa melanggar aturan maupun merugikan pihak lain.")
+                else:
+                    st.markdown(f"⚠️ Jawaban Anda: **{d['jawaban_user'] if d['jawaban_user'] else '(Tidak dijawab)'}** — skor {d['nilai_pilihan']} dari {d['skor_maks']}")
+                    st.markdown(f"⭐ Pilihan Skor Tertinggi: **{d['opsi_terbaik']}** (skor {d['skor_maks']})")
+                    st.info(f"💡 Evaluasi: Anda kehilangan {d['skor_maks'] - d['nilai_pilihan']} poin. Pada TKP tidak ada jawaban salah mutlak, namun pilihan bernilai {d['skor_maks']} adalah sikap yang paling menunjukkan inisiatif, profesionalisme, dan penyelesaian masalah secara tuntas.")
+                st.markdown("---")
+
+    tampilkan_review_kunci(review_twk, "🇮🇩 TWK", 30)
+    tampilkan_review_kunci(review_tiu, "🧠 TIU", 35)
+    tampilkan_review_tkp(review_tkp, "🤝 TKP", 45)
     
     st.markdown("---")
     if st.button("Kembali ke Menu Utama"):
